@@ -1,0 +1,166 @@
+---
+title: "Introduction to R"
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: cosmo
+author: "Isabelle Laforest-Lapointe, Amy Heim, Sophie Boutin, Jonathan Rondeau-Leclaire"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This tutorial was created for a 3-day free R introduction workshop organized by the [Laforest-Lapointe Lab](https://www.laforestlab.com/) at Université de Sherbrooke on May 12th-14th.
+
+# The Basics (Monday morning)
+
+## Data classes
+
+Objects and object components (e.g., data frame variables) always have a class. This class gives you a hint on how it will behave. You can check the class of any object this way:
+
+```{r data class}
+class(ToothGrowth) # class of the object ToothGrowth
+str(ToothGrowth) # class of each element of ToothGrowth
+class(ToothGrowth$supp) # class of a specific element of ToothGrowth
+```
+There exist many classes, but a few are much more common than others. In the above example with `str()`, we can see two other classes, namely `num` for numeric vectors and `factor`, which is a special (composite) class for categorical data. Other common classes are `character` (chr), `integer` (int), `character` (chr) and `logical` (logi). 
+
+```{r data class 2}
+
+```
+
+We can also see a composite class, `data.frame`. These are used for more complex objects, usually with two dimensions. Other composite classes include `matrix`, which are similar to data frames (the difference between these two is that data frames can contain elements of various classes). There are also `list` and `array`, but these won't be covered in this course.
+
+
+
+## Data overview
+
+In any project, a first step should always be to look at your data as it appears in R. Many functions exist to help you do that. `summary()` will summarise variables in a class-dependent manner: numeric variables get a numeric summary (median, range, etc.), factors and logical get a count per category, and characters get a overview of the first values.
+
+```{r summary}
+summary(ToothGrowth)
+```
+
+Other useful functions are `head()`, which shows the first rows of an object, and `View()`, which opens shows the object in a formatted manner, a bit like an excel sheet.
+
+```{r head}
+head(ToothGrowth)
+```
+
+Other useful checks are `dim()` or `length()`, especially when playing with functions that modify our objects: 
+
+```{r dim}
+dim(ToothGrowth) # shows the dimensions of matrices and data frames
+ncol(ToothGrowth) # number of columns
+colnames(ToothGrowth) # column (variable) names
+length(ToothGrowth$len) # shows the length of vectors
+```
+
+## Basic operations
+
+R can be used to operate on values in pretty much any way imaginable, from very simple things like calculating the mean to more complex things like removing certain characters from every values in a data frame variable.
+
+There are a few basic functions worth knowing, as they can come in handy in many different situations. The very basic one is `c()` which is used to combine its arguments into a vector. If all arguments are numeric, the vector will be numeric. If they is at least one string (using `"double quotes"`), it will be a character vector.
+
+```{r vectors}
+a_vector <- c("string1", "string2", "string3") # combine these strings into a vector
+another_vector <- c("string4", "string5", "string6") # idem
+both_vectors <- c(a_vector, another_vector) # combine both vectors
+class(both_vectors); both_vectors
+```
+Most mathematical operations are available as functions :
+```{r math ops}
+some_numbers <- head(ToothGrowth$len)
+sum(some_numbers) # Sum the values of a numeric vector
+sqrt(some_numbers) # square root of each value
+sum(some_numbers)/length(some_numbers) # compute the mean "manually"
+mean(some_numbers) # compute the mean using a specific function
+median(some_numbers)
+sd(some_numbers) # compute the standard deviation
+min(some_numbers) # find the minimum
+```
+
+Operations can also be done between columns of a data frame. In the following, we multiply two columns together and add the resulting vector as a new column on the same dataset using the `<-` (assignment) operator.
+```{r}
+vector_mutiplication <- ToothGrowth$len * ToothGrowth$dose
+ToothGrowth$new_column <- vector_mutiplication # add as a column
+ToothGrowth[['new_column']] <- vector_mutiplication # equivalent
+summary(ToothGrowth) 
+```
+
+### Loops
+
+Loops are very useful, as they help us do similar operations multiple times while coding them only once. Let's say there you would like to multiply three columns of your dataframe by 1000. If your data was a numeric matrix, you could simply multiply the matrix object by 1000, e.g. `new_matrix = old_matrix*1000`. But we usually work with data frames, because our data contains various types of variables. Thus, columns may be characters or factors, which obviously cannot be multiplied. So we want to selectively multiply certain columns :
+
+```{r}
+my_data_frame <- ToothGrowth # we just copy the df not to overwrite it
+my_data_frame$len <- my_data_frame$len*1000
+my_data_frame$dose <- my_data_frame$dose*1000
+my_data_frame$new_column <- my_data_frame$new_column*1000
+```
+and so on for every variable. Using a loop, it would look like this:
+```{r}
+for (i in c('len', 'dose', 'new_column')) { # define what to iterate on
+  my_data_frame[[i]] <- my_data_frame[[i]]*1000
+}
+summary(my_data_frame)
+```
+It may not be useful for such a simple operation on only a few columns, but you can imagine how much time would be saved if the operations you do are more complex and need to be applied to multiple columns. Moreover, if you realise you need to multiply by 100 instead, you only have to change in one place, reducing the risk of syntax error.
+
+
+### R as a calculator
+
+You can also straight up use R as you would a calculator. Let's find the area of a single slice of a 14" pizza cut in 8, then format the result to be more "readable" :
+
+```{r}
+slice_area <- (pi*(14/2)^2)/4
+slice_area_formatted <- round(slice_area, 2)
+paste('The slice of a 14 inches pizza cut in 8 will have a surface of', slice_area_formatted, "square inches.")
+```
+
+Notice that we've created many objects to do this. We could just as well have done a single-liner that only prints the result to our console:
+```{r}
+paste('The slice of a 14 inches pizza cut in 8 will have a surface of', round((pi*(14/2)^2)/4, 2), "square inches.")
+```
+but it's up to you to decide how explicit you want your code to be. More explicit code is more readable, but requires more steps to be written out. It's all about balance.
+
+
+You can also use R as a random number generator. The simplest way is using the uniform distribution, `runif()`, which draws `n` observations between specified values, and all values have an equal chance of being drawn.
+
+```{r}
+a_vector_of_values <- runif(n = 10, min = 0, max = 100)
+a_vector_of_values
+sort(a_vector_of_values)
+```
+You can draw from the normal distribution too, by specifying the mean and sd :
+
+```{r}
+a_normal_draw <- rnorm(n = 100, mean = 0, sd = 1)
+head(a_normal_draw)
+hist(a_normal_draw)
+```
+
+# Plots with ggplot
+
+First, import real data
+
+## Preparing your data
+
+### The tidyverse syntax
+
+### Creating and modifying variables
+
+### Basic string manipulation
+
+### Pivoting tables
+
+### 
+
+```{r }
+
+```
