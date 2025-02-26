@@ -1,2 +1,5 @@
-# RworkshopUdS_2025
-Repo for ressources to organize and teach the R workshop in May 2025 at UdeS
+# 2025 Laforest-Lapointe Lab R Workshop
+
+Resources for organizing the May 12-14th workshop at USherbrooke's Biology department.
+
+Follow this link to the tutorial.
