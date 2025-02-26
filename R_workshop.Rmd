@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This tutorial was created for a 3-day free R introduction workshop organized by the [Laforest-Lapointe Lab](https://www.laforestlab.com/) at Université de Sherbrooke on May 12th-14th.
 
-# The Basics (Monday morning)
+# The Basics (Monday)
 
 ## Data classes
 
@@ -35,8 +35,6 @@ There exist many classes, but a few are much more common than others. In the abo
 ```
 
 We can also see a composite class, `data.frame`. These are used for more complex objects, usually with two dimensions. Other composite classes include `matrix`, which are similar to data frames (the difference between these two is that data frames can contain elements of various classes). There are also `list` and `array`, but these won't be covered in this course.
-
-
 
 ## Data overview
 
@@ -95,7 +93,7 @@ summary(ToothGrowth)
 
 ### Loops
 
-Loops are very useful, as they help us do similar operations multiple times while coding them only once. Let's say there you would like to multiply three columns of your dataframe by 1000. If your data was a numeric matrix, you could simply multiply the matrix object by 1000, e.g. `new_matrix = old_matrix*1000`. But we usually work with data frames, because our data contains various types of variables. Thus, columns may be characters or factors, which obviously cannot be multiplied. So we want to selectively multiply certain columns :
+Loops are very useful, as they help us do similar operations multiple times while writing them only once. Let's say there you would like to multiply three columns of your dataframe by 1000. If your data was a numeric matrix, you could simply multiply the matrix object by 1000, e.g. `new_matrix = old_matrix*1000`. But we usually work with data frames, because our data contains various types of variables. Thus, columns may be characters or factors, which obviously cannot be multiplied. So we want to selectively multiply certain columns :
 
 ```{r}
 my_data_frame <- ToothGrowth # we just copy the df not to overwrite it
@@ -145,7 +143,7 @@ head(a_normal_draw)
 hist(a_normal_draw)
 ```
 
-# Plots with ggplot
+# Plots with ggplot (Tuesday)
 
 First, import real data
 
@@ -164,3 +162,5 @@ First, import real data
 ```{r }
 
 ```
+
+# Stats in R (Wednesday)
