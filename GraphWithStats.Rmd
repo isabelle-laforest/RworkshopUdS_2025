@@ -1,0 +1,240 @@
+---
+title: "Learn, Visualize, and Analyze!"
+output: html_document
+date: "2025-05-13"
+author: "Laforest-Lapointe Lab"
+---
+
+### Load Packages And Data
+
+#### Load packages   
+Run the `install.packages()` if packages are not installed yet.
+```{r results='hide', message=FALSE}
+#install.packages("ggpubr")
+library(ggpubr)
+#install.packages("ggplot2")
+library(ggplot2)
+#install.packages("FSA")
+library(FSA)
+#install.packages("dunn.test")
+library(dunn.test)
+#install.packages("dplyr")
+library(dplyr)
+#install.packages("rstatix")
+library(rstatix)
+```
+
+```{r include=FALSE}
+assay <- read.table("/Users/bous2941/Library/CloudStorage/OneDrive-USherbrooke/PhD_SOPHIE_BOUTIN/TEACHING/RWORKSHOP_2025/assay.txt")
+```
+
+#### Import data
+```{r eval=FALSE}
+assay <- read.table("assay.txt")
+```
+Change variables class to factor.
+```{r}
+assay$Antibiotic <- as.factor(assay$Antibiotic)
+assay$OD <- as.factor(assay$OD)
+```
+
+
+## Compare the mean of two groups
+
+**Conditions to apply t-test (parametric)** 
+
+1. Quantitative variable 
+
+2. Normality 
+
+To test normality: Shapiro-Wilk `shapiro.test()` 
+
+3. Equality of variances 
+
+To test equality of variance: Fisher-Snedecor (F test) `var.test()`
+
+4. Independent observations 
+
+**What to do if conditions are not respected:**
+
+- Not normal (big *n*) 
+
+*t*-test is fine but its power is reduced 
+
+We can normalise the data 
+
+permutation *t*-test is better 
+
+- Not normal (small *n*) 
+
+Permutation *t*-test if variances are equal, if not -> Wilcoxon-Mann-Whitney (*U*) 
+
+- Semi-quantitative 
+
+Wilcoxon-Mann-Whitney (*U*)
+
+
+## Compare the mean across more than two groups
+
+### ANOVA (parametric)
+
+**Conditions to apply t-test (parametric)** 
+
+1. Independent observation  
+
+2. Normality (`shapiro.test()`) 
+
+3. Homogeneous variance (`leveneTest()`) 
+
+#### post-hoc HSD Tukey
+
+-> Same conditions as ANOVA  
+
+
+### Kruskal-Wallis (non-parametric)
+
+#### Dunn test
+
+
+
+
+
+
+## Correlation between two variables
+
+Pearson
+Spearman
+Permutation
+
+
+
+
+
+
+
+
+
+### T-test
+
+#### Make a boxplot of CFU in function of antibiotic type
+```{r}
+(plot1 <- ggplot(assay, aes(Antibiotic, CFU, colour = Antibiotic, fill = Antibiotic))+
+  geom_boxplot()+
+  theme_classic()+
+  scale_color_manual(values = c("black", "black"))+
+  scale_fill_manual(values = c("lightskyblue","palegreen3")))
+```
+
+#### Perform t-test
+```{r}
+t.test(assay$CFU~assay$Antibiotic) # p-value = 0.06063
+```
+Create an object with the t-test output
+```{r}
+res.t.test <- t.test(assay$CFU~assay$Antibiotic)
+```
+Extract p-value from t-test output
+```{r}
+res.t.test$p.value
+```
+
+#### Different ways to add t-test p-value on graph
+```{r}
+plot1 +
+  # Using stat_compare_means
+  stat_compare_means(method = "t.test")+
+  # Using annotate and the t-test output
+  annotate("text", x = 0.6, y =30, label = res.t.test$p.value, color = "red")+
+  # Same but round it to 2 digits
+  annotate("text", x = 0.6, y =27, label = round(res.t.test$p.value, digits = 2), color = "blue")+
+  # Add value manually (Not "automatic")
+  annotate("text", x = 1.5, y =30, label = "T-test, p = 0.06", color = "darkgreen")
+```
+
+### Anova, Kruskal, Dunn
+
+#### Make a plot of CFU count in function of optical density (OD)
+```{r}
+(plot2 <- ggplot(assay, aes(OD, CFU, color = OD, fill = OD))+
+  stat_summary(geom = "col", fun = mean)+
+  theme_classic()+
+  ggtitle("Bacterial Count")+
+  scale_color_manual(values = c("black", "black", "black"))+
+  scale_fill_manual(values = c("darkolivegreen1","darkolivegreen3", "darkolivegreen4")))
+```
+
+Add points
+```{r}
+(plot2 +
+  geom_jitter(show.legend = FALSE))
+```
+
+Add error bars
+```{r}
+(plot2 <- plot2 +
+  geom_jitter(show.legend = FALSE)+
+  stat_summary(geom = "errorbar", fun.data = "mean_sdl", fun.args = list(mult = 1), width = 0.5, show.legend = FALSE))
+```
+
+#### Perform statistical tests
+```{r}
+res.aov <- aov(CFU ~ OD, data = assay)
+summary(res.aov) # p = 9.5x10(-16)
+kruskal.test(CFU ~ OD, data = assay) # p = 1.5x10(-9)
+dunn_results <- dunnTest(CFU ~ OD, data = assay, method = "bonferroni")
+```
+Add a column showing significance levels (***) to the Dunn test result object
+```{r}
+dunn_results$res
+dunn_results$res <- dunn_results$res %>%
+  mutate(stars = case_when(
+    P.adj < 0.001 ~ "***",
+    P.adj < 0.01 ~ "**",
+    P.adj < 0.05 ~ "*",
+    TRUE ~ "ns"
+  ))
+```
+
+#### Add stats on plots
+Some parameters needed for the next plots
+```{r}
+compar <- lapply(strsplit(dunn_results$res$Comparison, " - "), function(x) x)
+y_positions <- c(max(assay$CFU) + 0.5, max(assay$CFU) + 3.5, max(assay$CFU) + 7)
+```
+
+Use *stat_compare_means( )*
+```{r}
+plot2+
+  stat_compare_means(method = "kruskal.test")
+
+plot2+
+  stat_compare_means(method = "anova")
+```
+
+Use *geom_signif( )*
+```{r}
+plot2+
+  geom_signif(comparisons = compar, 
+              annotations = format(dunn_results$res$P.adj, scientific = TRUE),
+              textsize = 4,  
+              y_position = y_positions) 
+
+plot2 +
+  geom_signif(comparisons = compar, 
+              annotations = dunn_results$res$stars,
+              textsize = 5,  
+              y_position = y_positions)
+```
+
+
+```{r}
+```
+
+
+
+
+
+
+
+
+
