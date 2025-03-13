@@ -1,18 +1,16 @@
 ---
-title: "RWorkshop2025_Intro"
+title: "Session 1 - Introduction"
 output: html_document
-date: "2025-02-27"
 ---
-# Introduction to RStudio
 
 ## RStudio environement
 
 When you open RStudio, you will have four panels:  
 
 **Top left:** Script  
-Document where you will write the command lines. This document can be saved for further modifications.
+Document where you will write the command lines:This document can be saved for further modifications.  
 
-**Bottom left:** Console 
+**Bottom left:** Console  
 Where the output of the command line will appear. Use it to test stuff that you do not want to save in the script.
 
 **Top right:** Environment  
@@ -38,13 +36,13 @@ Multiply the result
 ```
 
 ## Data types
-Character
-Numeric
-Integer
-Factor
-Logical
-Vector
-Data frame
+Character  
+Numeric  
+Integer  
+Factor  
+Logical  
+Vector  
+Data frame  
 Matrix
 ```{r}
 # Create a vector of numeric values
@@ -65,7 +63,15 @@ class(df1)
 ```
 
 ## Common symbols
-TRUE/FALSE, <-, <, >, <=, >=, !=
+TRUE/FALSE  
+**<-** assign an object  
+**=** assign an object and equal  
+**==** equal (when sub-setting)  
+**<** smaller than  
+**>** greater than  
+**<=** smaller or equal to  
+**>=** greater or equal to  
+**!=** is not equal  
 ```{r}
 5 > 6
 5 <= 6
