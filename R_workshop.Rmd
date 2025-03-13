@@ -11,6 +11,8 @@ output:
 author: "Isabelle Laforest-Lapointe, Amy Heim, Sophie Boutin, Jonathan Rondeau-Leclaire"
 ---
 
+# test pull request
+ 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -28,13 +30,14 @@ class(ToothGrowth) # class of the object ToothGrowth
 str(ToothGrowth) # class of each element of ToothGrowth
 class(ToothGrowth$supp) # class of a specific element of ToothGrowth
 ```
+
 There exist many classes, but a few are much more common than others. In the above example with `str()`, we can see two other classes, namely `num` for numeric vectors and `factor`, which is a special (composite) class for categorical data. Other common classes are `character` (chr), `integer` (int), `character` (chr) and `logical` (logi). 
 
 ```{r data class 2}
 
 ```
 
-We can also see a composite class, `data.frame`. These are used for more complex objects, usually with two dimensions. Other composite classes include `matrix`, which are similar to data frames (the difference between these two is that data frames can contain elements of various classes). There are also `list` and `array`, but these won't be covered in this course.
+We can also see a composite class, `data.frame`. These are used for more complex objects, usually with two dimensions. Other composite classes include `matrix`, which are similar to data frames (the difference between these two is that data frames can contain elements of various classes). There are also `list` and `array`, which won't be covered in this course.
 
 ## Data overview
 
@@ -101,6 +104,7 @@ my_data_frame$len <- my_data_frame$len*1000
 my_data_frame$dose <- my_data_frame$dose*1000
 my_data_frame$new_column <- my_data_frame$new_column*1000
 ```
+
 and so on for every variable. Using a loop, it would look like this:
 ```{r}
 for (i in c('len', 'dose', 'new_column')) { # define what to iterate on
@@ -126,7 +130,6 @@ Notice that we've created many objects to do this. We could just as well have do
 paste('The slice of a 14 inches pizza cut in 8 will have a surface of', round((pi*(14/2)^2)/4, 2), "square inches.")
 ```
 but it's up to you to decide how explicit you want your code to be. More explicit code is more readable, but requires more steps to be written out. It's all about balance.
-
 
 You can also use R as a random number generator. The simplest way is using the uniform distribution, `runif()`, which draws `n` observations between specified values, and all values have an equal chance of being drawn.
 
