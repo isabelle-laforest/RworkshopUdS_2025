@@ -2,7 +2,7 @@
 title: "Session 1 - Introduction"
 output: html_document
 ---
-
+# title
 ## RStudio environement
 
 When you open RStudio, you will have four panels:  
