@@ -24,12 +24,8 @@ library(dplyr)
 library(rstatix)
 ```
 
-```{r include=FALSE}
-assay <- read.table("/Users/bous2941/Library/CloudStorage/OneDrive-USherbrooke/PhD_SOPHIE_BOUTIN/TEACHING/RWORKSHOP_2025/assay.txt")
-```
-
 #### Import data
-```{r eval=FALSE}
+```{r}
 assay <- read.table("assay.txt")
 ```
 Change variables class to factor.
@@ -38,8 +34,7 @@ assay$Antibiotic <- as.factor(assay$Antibiotic)
 assay$OD <- as.factor(assay$OD)
 ```
 
-
-## Compare the mean of two groups
+## Compare the mean of two groups (Isabelle work here)
 
 **Conditions to apply t-test (parametric)** 
 
@@ -74,7 +69,7 @@ Permutation *t*-test if variances are equal, if not -> Wilcoxon-Mann-Whitney (*U
 Wilcoxon-Mann-Whitney (*U*)
 
 
-## Compare the mean across more than two groups
+## Compare the mean across more than two groups (Sophie work here)
 
 ### ANOVA (parametric)
 
