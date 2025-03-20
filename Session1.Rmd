@@ -63,6 +63,7 @@ class(df1)
 ```
 
 ## Common symbols
+**$**  
 TRUE/FALSE  
 **<-** assign an object  
 **=** assign an object and equal  
