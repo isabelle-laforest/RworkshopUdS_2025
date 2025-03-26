@@ -19,7 +19,8 @@ This tutorial was created for a 3-day free R introduction workshop organized by 
 
 # The Basics (Monday)
 
-** Show how to import a "perfect" dataset*
+\*\* Show how to import a "perfect" dataset\*
+
 ```{r}
 assay <- read.table("data/assay.txt", header = TRUE)
 ```
@@ -29,19 +30,10 @@ assay <- read.table("data/assay.txt", header = TRUE)
 Objects and object components (e.g., data frame variables) always have a class. This class gives you a hint on how it will behave. You can check the class of any object this way:
 
 ```{r data class}
-class(assay) # class of the object assay
-str(assay) # class of each element of assay
-class(assay$CFU) # class of a specific element of assay
+#SOPHIES CODE
 ```
 
-There exist many classes, but a few are much more common than others. In the above example with `str()`, we can see two other classes, namely `num` for numeric vectors and `factor`, which is a special (composite) class for categorical data. Other common classes are `character` (chr), `integer` (int), `character` (chr) and `logical` (logi). 
-
-For convenience, it's always good to have character columns as factor if they represent categorical data. 
-
-```{r data class 2}
-assay$Antibiotic <- as.factor(assay$Antibiotic)
-str(assay$Antibiotic)
-```
+There exist many classes, but a few are much more common than others. In the above example with `str()`, we can see two other classes, namely `num` for numeric vectors and `factor`, which is a special (composite) class for categorical data. Other common classes are `character` (chr), `integer` (int), `character` (chr) and `logical` (logi).
 
 We can also see a composite class, `data.frame`. These are used for more complex objects, usually with two dimensions. Other composite classes include `matrix`, which are similar to data frames (the difference between these two is that data frames can contain elements of various classes). There are also `list` and `array`, which won't be covered in this course.
 
@@ -59,7 +51,7 @@ Other useful functions are `head()`, which shows the first rows of an object, an
 head(assay)
 ```
 
-Other useful checks are `dim()` or `length()`, especially when playing with functions that modify our objects: 
+Other useful checks are `dim()` or `length()`, especially when playing with functions that modify our objects:
 
 ```{r dim}
 dim(assay) # shows the dimensions of matrices and data frames
@@ -75,6 +67,7 @@ R can be used to operate on values in pretty much any way imaginable, from very 
 There are a few basic functions worth knowing, as they can come in handy in many different situations. The very basic one is `c()` which is used to combine its arguments into a vector. If all arguments are numeric, the vector will be numeric. If they is at least one string (using `"double quotes"`), it will be a character vector.
 
 Most mathematical operations are available as functions :
+
 ```{r math ops}
 some_numbers <- head(assay$CFU)
 sum(some_numbers) # Sum the values of a numeric vector
@@ -87,6 +80,7 @@ min(some_numbers) # find the minimum
 ```
 
 Operations can also be done between columns of a data frame. In the following, we multiply two columns together and add the resulting vector as a new column on the same dataset using the `<-` (assignment) operator.
+
 ```{r}
 vector_mutiplication <- assay$CFU * assay$OD
 assay$new_column <- vector_mutiplication # add as a column
@@ -106,12 +100,14 @@ my_data_frame$new_column <- my_data_frame$new_column*1000
 ```
 
 and so on for every variable. Using a loop, it would look like this:
+
 ```{r}
 for (i in c('OD', 'CFU', 'new_column')) { # define what to iterate on
   my_data_frame[[i]] <- my_data_frame[[i]]*1000
 }
 summary(my_data_frame)
 ```
+
 It may not be useful for such a simple operation on only a few columns, but you can imagine how much time would be saved if the operations you do are more complex and need to be applied to multiple columns. Moreover, if you realise you need to multiply by 100 instead, you only have to change in one place, reducing the risk of syntax error.
 
 ### Introduce a challenge !!! using loops??&
@@ -127,9 +123,11 @@ paste('The slice of a 14 inches pizza cut in 8 will have a surface of', slice_ar
 ```
 
 Notice that we've created many objects to do this. We could just as well have done a single-liner that only prints the result to our console:
+
 ```{r}
 paste('The slice of a 14 inches pizza cut in 8 will have a surface of', round((pi*(14/2)^2)/4, 2), "square inches.")
 ```
+
 but it's up to you to decide how explicit you want your code to be. More explicit code is more readable, but requires more steps to be written out. It's all about balance.
 
 You can also use R as a random number generator. The simplest way is using the uniform distribution, `runif()`, which draws `n` observations between specified values, and all values have an equal chance of being drawn.
@@ -139,6 +137,7 @@ a_vector_of_values <- runif(n = 10, min = 0, max = 100)
 a_vector_of_values
 sort(a_vector_of_values)
 ```
+
 You can draw from the normal distribution too, by specifying the mean and sd :
 
 ```{r}
@@ -149,39 +148,50 @@ hist(a_normal_draw)
 
 ## Afternoon session w/ isa
 
-
 ## Hands on session 1
+
 #### Create a new script for your project
+
 #### Import your data
+
 #### Explore it
+
 #### Format your data (categorical data as factors)
+
 #### Subset, compute group means and sd
+
 #### Make a histogram of a numeric variable
+
 #### Make a dot plot with two variables (at least one numeric)
+
 #### Ask us how to do what you want to do !
 
 # Plots with ggplot (Tuesday)
 
-We work with a real dataset where tomato plants have been infected (or not) with a pathogen. We want to look at the proportion of leaf area affected by chlorosis and compare it between the infected and control groups. 
+We work with a real dataset where tomato plants have been infected (or not) with a pathogen. We want to look at the proportion of leaf area affected by chlorosis and compare it between the infected and control groups.
 
 ## Objective
+
 Plot the proportion of plant leaf covered by chlorosis with mean and standard devitions by replicate, in a way that will allow us to compare the two groups (infected and not infected) across the two treatments (mock of treated).
 
 Two packages are required here, make sure you have installed them:
+
 ```{r}
 # install.packages('tidyverse') # super-package that includes ggplot
 # install.packages('openxlsx') # to parse excel files
 ```
 
 ## Preparing the data
+
 ```{r}
 library(openxlsx)
-tomato <- read.xlsx('data/Rocio_tomato_infection.xlsx')
+tomato <- read.xlsx('data/Rocio_tomato.xlsx')
 str(tomato)
 
 ```
 
 We have two character columns, which would be preferable to convert to factors. I have intentionnally introduced a typographic error in one of these character columns; factors will help us spot them quickly.
+
 ```{r}
 tomato$Treatement <- as.factor(tomato$Treatement)
 tomato$Infection <- as.factor(tomato$Infection)
@@ -202,11 +212,11 @@ tomato <- tomato %>%
 summary(tomato)
 ```
 
-It may not seem like we gained much in terms of amount of code to write. But consider the following things we might want to do as well: 
+It may not seem like we gained much in terms of amount of code to write. But consider the following things we might want to do as well:
 
-1. The `Treatement` column name has an extra `e` in it, it should be `Treatment`
-2. There is a typo in one of the Infection values we want to correct
-3. We want to compute the proportion of the total area that is chlorotic
+1.  The `Treatement` column name has an extra `e` in it, it should be `Treatment`
+2.  There is a typo in one of the Infection values we want to correct
+3.  We want to compute the proportion of the total area that is chlorotic
 
 We can do all of this in a single piped command, without needing to rewrite `tomato$columnName <- ...` every time. Let's do all these three things, starting again from the raw data.
 
