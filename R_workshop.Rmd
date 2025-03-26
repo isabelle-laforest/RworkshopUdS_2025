@@ -258,6 +258,7 @@ tomato_summary
 Doing this using base R syntax would have required many intermediate objects, whereas here we get the end product with a single pipe that does all we need.
 
 We can also format this table if we wanted to export it. The kableExtra package is quite useful for this. We first round the values to the second decimal using `mutate()`, then change the column names and style the table.
+
 ```{r}
 tomato_summary %>% 
   mutate(across(where(is.numeric), ~ round(., 2))) %>% 
