@@ -19,7 +19,8 @@ This tutorial was created for a 3-day free R introduction workshop organized by 
 
 # The Basics (Monday)
 
-** Show how to import a "perfect" dataset*
+\*\* Show how to import a "perfect" dataset\*
+
 ```{r}
 assay <- read.table("data/assay.txt", header = TRUE)
 ```
@@ -29,19 +30,10 @@ assay <- read.table("data/assay.txt", header = TRUE)
 Objects and object components (e.g., data frame variables) always have a class. This class gives you a hint on how it will behave. You can check the class of any object this way:
 
 ```{r data class}
-class(assay) # class of the object assay
-str(assay) # class of each element of assay
-class(assay$CFU) # class of a specific element of assay
+#SOPHIES CODE
 ```
 
-There exist many classes, but a few are much more common than others. In the above example with `str()`, we can see two other classes, namely `num` for numeric vectors and `factor`, which is a special (composite) class for categorical data. Other common classes are `character` (chr), `integer` (int), `character` (chr) and `logical` (logi). 
-
-For convenience, it's always good to have character columns as factor if they represent categorical data. 
-
-```{r data class 2}
-assay$Antibiotic <- as.factor(assay$Antibiotic)
-str(assay$Antibiotic)
-```
+There exist many classes, but a few are much more common than others. In the above example with `str()`, we can see two other classes, namely `num` for numeric vectors and `factor`, which is a special (composite) class for categorical data. Other common classes are `character` (chr), `integer` (int), `character` (chr) and `logical` (logi).
 
 We can also see a composite class, `data.frame`. These are used for more complex objects, usually with two dimensions. Other composite classes include `matrix`, which are similar to data frames (the difference between these two is that data frames can contain elements of various classes). There are also `list` and `array`, which won't be covered in this course.
 
@@ -59,7 +51,7 @@ Other useful functions are `head()`, which shows the first rows of an object, an
 head(assay)
 ```
 
-Other useful checks are `dim()` or `length()`, especially when playing with functions that modify our objects: 
+Other useful checks are `dim()` or `length()`, especially when playing with functions that modify our objects:
 
 ```{r dim}
 dim(assay) # shows the dimensions of matrices and data frames
@@ -75,6 +67,7 @@ R can be used to operate on values in pretty much any way imaginable, from very 
 There are a few basic functions worth knowing, as they can come in handy in many different situations. The very basic one is `c()` which is used to combine its arguments into a vector. If all arguments are numeric, the vector will be numeric. If they is at least one string (using `"double quotes"`), it will be a character vector.
 
 Most mathematical operations are available as functions :
+
 ```{r math ops}
 some_numbers <- head(assay$CFU)
 sum(some_numbers) # Sum the values of a numeric vector
@@ -87,6 +80,7 @@ min(some_numbers) # find the minimum
 ```
 
 Operations can also be done between columns of a data frame. In the following, we multiply two columns together and add the resulting vector as a new column on the same dataset using the `<-` (assignment) operator.
+
 ```{r}
 vector_mutiplication <- assay$CFU * assay$OD
 assay$new_column <- vector_mutiplication # add as a column
@@ -106,13 +100,23 @@ my_data_frame$new_column <- my_data_frame$new_column*1000
 ```
 
 and so on for every variable. Using a loop, it would look like this:
+
 ```{r}
-for (i in c('OD', 'CFU', 'new_column')) { # define what to iterate on
+for (i in c('OD', 'CFU', 'new_column') ) { # define what to iterate on
   my_data_frame[[i]] <- my_data_frame[[i]]*1000
 }
 summary(my_data_frame)
 ```
+
 It may not be useful for such a simple operation on only a few columns, but you can imagine how much time would be saved if the operations you do are more complex and need to be applied to multiple columns. Moreover, if you realise you need to multiply by 100 instead, you only have to change in one place, reducing the risk of syntax error.
+
+### Challenge N˚1
+
+Load 
+
+```{r}
+
+```
 
 ### Introduce a challenge !!! using loops??&
 
@@ -127,9 +131,11 @@ paste('The slice of a 14 inches pizza cut in 8 will have a surface of', slice_ar
 ```
 
 Notice that we've created many objects to do this. We could just as well have done a single-liner that only prints the result to our console:
+
 ```{r}
 paste('The slice of a 14 inches pizza cut in 8 will have a surface of', round((pi*(14/2)^2)/4, 2), "square inches.")
 ```
+
 but it's up to you to decide how explicit you want your code to be. More explicit code is more readable, but requires more steps to be written out. It's all about balance.
 
 You can also use R as a random number generator. The simplest way is using the uniform distribution, `runif()`, which draws `n` observations between specified values, and all values have an equal chance of being drawn.
@@ -139,6 +145,7 @@ a_vector_of_values <- runif(n = 10, min = 0, max = 100)
 a_vector_of_values
 sort(a_vector_of_values)
 ```
+
 You can draw from the normal distribution too, by specifying the mean and sd :
 
 ```{r}
@@ -149,75 +156,140 @@ hist(a_normal_draw)
 
 ## Afternoon session w/ isa
 
-
 ## Hands on session 1
+
 #### Create a new script for your project
+
 #### Import your data
+
 #### Explore it
+
 #### Format your data (categorical data as factors)
+
 #### Subset, compute group means and sd
+
 #### Make a histogram of a numeric variable
+
 #### Make a dot plot with two variables (at least one numeric)
+
 #### Ask us how to do what you want to do !
 
 # Plots with ggplot (Tuesday)
 
-We work with a real dataset where tomato plants have been infected (or not) with a pathogen. We want to look at the proportion of leaf area affected by chlorosis and compare it between the infected and control groups. 
+We work with a real dataset where tomato plants have been infected (or not) with a pathogen. We want to look at the proportion of leaf area affected by chlorosis and compare it between the infected and control groups.
 
-## Objective
-Plot the proportion of plant leaf covered by chlorosis with mean and standard devitions by replicate, in a way that will allow us to compare the two groups (infected and not infected) across the two treatments (mock of treated).
+## Objectives
+
+1. Learn the tidyverse syntax
+
+2. Plot the proportion of plant leaf covered by chlorosis with mean and standard devitions by replicate, in a way that will allow us to compare the two groups (infected and not infected) across the two treatments (mock of treated).
+
 
 Two packages are required here, make sure you have installed them:
+
 ```{r}
 # install.packages('tidyverse') # super-package that includes ggplot
 # install.packages('openxlsx') # to parse excel files
 ```
 
-## Preparing the data
+## The tidyverse syntax
+
+```{r load-packages, include=FALSE}
+library(pacman)
+p_load(tidyverse, magrittr, openxlsx, kableExtra)
+```
+
 ```{r}
-library(openxlsx)
-tomato <- read.xlsx('data/Rocio_tomato_infection.xlsx')
+
+tomato <- read.xlsx('data/Rocio_tomato.xlsx')
 str(tomato)
 
 ```
 
-We have two character columns, which would be preferable to convert to factors. I have intentionnally introduced a typographic error in one of these character columns; factors will help us spot them quickly.
+We introduce a modern syntax from the `tidyverse` superpackage, which uses the pipe operator `%>%`. You can print it by using the `shift+cmd+m` keyboard combination (or `shift+ctrl+m` on Windows).
+
+
+### Understanding pipes %>% 
+
+To show its usefuleness in making codes much easier to read, consider the following challenge: **Compute the mean proportion of chlorotic area of infected plants that were NOT treated, and format it to print as a percentage with 2 decimals.**.
+
+A traditional base R code could look like this: 
+
 ```{r}
-tomato$Treatement <- as.factor(tomato$Treatement)
-tomato$Infection <- as.factor(tomato$Infection)
-tomato$rep <- as.factor(tomato$rep)
-summary(tomato)
+which_observations <- which(tomato$Infection == 'pathogen' & tomato$Treatement == 'mock')
+inf_treat_chlor_area <- tomato$chlorotic.area[which_observations]
+inf_treat_total_area <- tomato$total.area[which_observations]
+prop_area <- 100*inf_treat_chlor_area/inf_treat_total_area
+
+paste('Mean proportion:', round(mean(prop_area),2), "%")
+```
+Now compare the same thing with the tidyverse syntax. We will use 3 new functions, namely:
+
+-`mutate()` is used to create new variables from existing ones
+
+-`filter()` subsets our rows based on the values of variables
+
+-`pull()` which returns a dataset column as a vector
+
+```{r}
+tomato %>% 
+  filter(Infection == 'pathogen' & Treatement == 'mock') %>% 
+  mutate(prop_area = 100*chlorotic.area/total.area) %>% 
+  pull(prop_area) %>% 
+  mean() %>% 
+  round(2) %>% 
+  paste("Mean proportion:", ., "%")
 ```
 
-That's one way to do it. But there is a different syntax we can use that comes from the `tidyverse` superpackage. It uses the pipe operator `%>%`, which you can generate by using the `shift+cmd+m` keyboard combination (or `shift+ctrl+m` on Windows). To familiarise yourself with it, let's do the same thing as above using this syntax:
+We can take advantage of that syntax to create more informative summaries of our data by using `group_by()`, a way to operate on subsets of our data without actually subsetting it; and passing the grouped dataframe to `summarise()`, which allows mathematical functions to be applied to every group. We then use `kable()` to format the output in a visually neat table.
 
 ```{r}
-library(tidyverse)
-library(magrittr)
+tomato_summary <- tomato %>% 
+  mutate(prop_area = 100*chlorotic.area/total.area) %>% 
+  group_by(Infection, Treatement) %>% 
+  summarise(mean_prop = mean(prop_area), 
+            sd_prop = sd(prop_area),
+            n_obs = n(),
+            .groups = 'drop')
 
-tomato <- tomato %>% 
+tomato_summary
+```
+
+Doing this using base R syntax would have required many intermediate objects, whereas here we get the end product with a single pipe that does all we need.
+
+We can also format this table if we wanted to export it. The kableExtra package is quite useful for this. We first round the values to the second decimal using `mutate()`, then change the column names and style the table.
+```{r}
+tomato_summary %>% 
+  mutate(across(where(is.numeric), ~ round(., 2))) %>% 
+  kable(col.names = c("Infection", "Treatment", "Mean % leaf chlorosis", "SD % leaf chlorosis", "N")) %>% 
+  kable_styling("striped")
+```
+
+
+### Modifying variables
+
+I have intentionally introduced a typographic error in the following dataset; factors will help us spot them quickly.To get there, let's convert characters as factors using `mutate()` :
+```{r}
+
+tomato_mdf <- read.xlsx('data/Rocio_tomato_modified.xlsx') %>% 
   mutate(Treatement = as.factor(Treatement),
          Infection = as.factor(Infection),
-         rep = as.factor(rep))
-summary(tomato)
+         rep = as.factor(rep)) # even if it's a number, it represents categorical information
+summary(tomato_mdf)
 ```
 
-It may not seem like we gained much in terms of amount of code to write. But consider the following things we might want to do as well: 
+Consider the following things we might want to do as well:
 
-1. The `Treatement` column name has an extra `e` in it, it should be `Treatment`
-2. There is a typo in one of the Infection values we want to correct
-3. We want to compute the proportion of the total area that is chlorotic
-
-We can do all of this in a single piped command, without needing to rewrite `tomato$columnName <- ...` every time. Let's do all these three things, starting again from the raw data.
+1.  The `Treatement` column name has an typo (an extra `e`) in it, it should be `Treatment`
+2.  There is a typo in one of the Infection values we want to correct
+3.  We want to compute the proportion of the total area that is chlorotic
 
 ```{r}
 
-tomato <- read.xlsx('data/Rocio_tomato_infection.xlsx') %>% 
+tomato_mdf <- tomato_mdf %>% 
   rename(Treatment = Treatement) %>% 
   mutate(
-    Treatment = as.factor(Treatment), 
-    rep = as.factor(rep),
-    prop_chlorosis = 100*chlorotic.area/total.area,
+    prop_area = 100*chlorotic.area/total.area,
     Infection = as.factor(
       case_when(
         Infection == "pathogn" ~ "pathogen",
@@ -225,17 +297,24 @@ tomato <- read.xlsx('data/Rocio_tomato_infection.xlsx') %>%
         ))
     )
 
-summary(tomato)
-dim(tomato)
+summary(tomato_mdf)
+dim(tomato_mdf)
 ```
 
-## Preparing your data
-
-### The tidyverse syntax
-
-### Creating and modifying variables
-
 ### Basic string manipulation
+
+We could go further and modify text values in our dataset. For example, we might want to capitalise the first letter of `pathogen`. We could use a case_when(), but if we want to capitalise all values in our variables, it becomes cumbersome. Instead, we can use one of the many string manipulation verbs in the `tidyverse` package.
+
+```{r}
+tomato_mdf %<>% 
+  mutate(
+    Infection = str_to_title(Infection),
+    Treatment = str_to_upper(Treatment)
+  )
+head(tomato_mdf)
+```
+
+Here I introduced the assignment pipe operator `%<>%`. It is equivalent to doing `tomato_mdf <- tomato_mdf %>% ...`. To use that pipe, the `magrittr` package must be explicitly loaded (we did it earlier).
 
 ### Pivoting tables
 

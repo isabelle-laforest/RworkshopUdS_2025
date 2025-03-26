@@ -6,4 +6,4 @@ tmp/
 .DS_Store
 ~$*
 
-
+*/figure-html/* # html rendering creates and delets those 
