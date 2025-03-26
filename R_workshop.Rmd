@@ -114,6 +114,7 @@ summary(my_data_frame)
 ```
 It may not be useful for such a simple operation on only a few columns, but you can imagine how much time would be saved if the operations you do are more complex and need to be applied to multiple columns. Moreover, if you realise you need to multiply by 100 instead, you only have to change in one place, reducing the risk of syntax error.
 
+### Introduce a challenge !!! using loops??&
 
 ### R as a calculator
 
@@ -145,6 +146,9 @@ a_normal_draw <- rnorm(n = 100, mean = 0, sd = 1)
 head(a_normal_draw)
 hist(a_normal_draw)
 ```
+
+## Afternoon session w/ isa
+
 
 ## Hands on session 1
 #### Create a new script for your project
