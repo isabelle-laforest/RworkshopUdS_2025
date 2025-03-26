@@ -11,8 +11,6 @@ output:
 author: "Isabelle Laforest-Lapointe, Amy Heim, Sophie Boutin, Jonathan Rondeau-Leclaire"
 ---
 
-# test pull request
- 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -21,20 +19,28 @@ This tutorial was created for a 3-day free R introduction workshop organized by 
 
 # The Basics (Monday)
 
+** Show how to import a "perfect" dataset*
+```{r}
+assay <- read.table("data/assay.txt", header = TRUE)
+```
+
 ## Data classes
 
 Objects and object components (e.g., data frame variables) always have a class. This class gives you a hint on how it will behave. You can check the class of any object this way:
 
 ```{r data class}
-class(ToothGrowth) # class of the object ToothGrowth
-str(ToothGrowth) # class of each element of ToothGrowth
-class(ToothGrowth$supp) # class of a specific element of ToothGrowth
+class(assay) # class of the object assay
+str(assay) # class of each element of assay
+class(assay$CFU) # class of a specific element of assay
 ```
 
 There exist many classes, but a few are much more common than others. In the above example with `str()`, we can see two other classes, namely `num` for numeric vectors and `factor`, which is a special (composite) class for categorical data. Other common classes are `character` (chr), `integer` (int), `character` (chr) and `logical` (logi). 
 
-```{r data class 2}
+For convenience, it's always good to have character columns as factor if they represent categorical data. 
 
+```{r data class 2}
+assay$Antibiotic <- as.factor(assay$Antibiotic)
+str(assay$Antibiotic)
 ```
 
 We can also see a composite class, `data.frame`. These are used for more complex objects, usually with two dimensions. Other composite classes include `matrix`, which are similar to data frames (the difference between these two is that data frames can contain elements of various classes). There are also `list` and `array`, which won't be covered in this course.
@@ -44,22 +50,22 @@ We can also see a composite class, `data.frame`. These are used for more complex
 In any project, a first step should always be to look at your data as it appears in R. Many functions exist to help you do that. `summary()` will summarise variables in a class-dependent manner: numeric variables get a numeric summary (median, range, etc.), factors and logical get a count per category, and characters get a overview of the first values.
 
 ```{r summary}
-summary(ToothGrowth)
+summary(assay)
 ```
 
 Other useful functions are `head()`, which shows the first rows of an object, and `View()`, which opens shows the object in a formatted manner, a bit like an excel sheet.
 
 ```{r head}
-head(ToothGrowth)
+head(assay)
 ```
 
 Other useful checks are `dim()` or `length()`, especially when playing with functions that modify our objects: 
 
 ```{r dim}
-dim(ToothGrowth) # shows the dimensions of matrices and data frames
-ncol(ToothGrowth) # number of columns
-colnames(ToothGrowth) # column (variable) names
-length(ToothGrowth$len) # shows the length of vectors
+dim(assay) # shows the dimensions of matrices and data frames
+ncol(assay) # number of columns
+colnames(assay) # column (variable) names
+length(assay$OD) # shows the length of vectors
 ```
 
 ## Basic operations
@@ -68,15 +74,9 @@ R can be used to operate on values in pretty much any way imaginable, from very 
 
 There are a few basic functions worth knowing, as they can come in handy in many different situations. The very basic one is `c()` which is used to combine its arguments into a vector. If all arguments are numeric, the vector will be numeric. If they is at least one string (using `"double quotes"`), it will be a character vector.
 
-```{r vectors}
-a_vector <- c("string1", "string2", "string3") # combine these strings into a vector
-another_vector <- c("string4", "string5", "string6") # idem
-both_vectors <- c(a_vector, another_vector) # combine both vectors
-class(both_vectors); both_vectors
-```
 Most mathematical operations are available as functions :
 ```{r math ops}
-some_numbers <- head(ToothGrowth$len)
+some_numbers <- head(assay$CFU)
 sum(some_numbers) # Sum the values of a numeric vector
 sqrt(some_numbers) # square root of each value
 sum(some_numbers)/length(some_numbers) # compute the mean "manually"
@@ -88,10 +88,10 @@ min(some_numbers) # find the minimum
 
 Operations can also be done between columns of a data frame. In the following, we multiply two columns together and add the resulting vector as a new column on the same dataset using the `<-` (assignment) operator.
 ```{r}
-vector_mutiplication <- ToothGrowth$len * ToothGrowth$dose
-ToothGrowth$new_column <- vector_mutiplication # add as a column
-ToothGrowth[['new_column']] <- vector_mutiplication # equivalent
-summary(ToothGrowth) 
+vector_mutiplication <- assay$CFU * assay$OD
+assay$new_column <- vector_mutiplication # add as a column
+assay[['new_column']] <- vector_mutiplication # equivalent
+summary(assay) 
 ```
 
 ### Loops
@@ -99,15 +99,15 @@ summary(ToothGrowth)
 Loops are very useful, as they help us do similar operations multiple times while writing them only once. Let's say there you would like to multiply three columns of your dataframe by 1000. If your data was a numeric matrix, you could simply multiply the matrix object by 1000, e.g. `new_matrix = old_matrix*1000`. But we usually work with data frames, because our data contains various types of variables. Thus, columns may be characters or factors, which obviously cannot be multiplied. So we want to selectively multiply certain columns :
 
 ```{r}
-my_data_frame <- ToothGrowth # we just copy the df not to overwrite it
-my_data_frame$len <- my_data_frame$len*1000
-my_data_frame$dose <- my_data_frame$dose*1000
+my_data_frame <- assay # we just copy the df not to overwrite it
+my_data_frame$CFU <- my_data_frame$CFU*1000
+my_data_frame$OD <- my_data_frame$OD*1000
 my_data_frame$new_column <- my_data_frame$new_column*1000
 ```
 
 and so on for every variable. Using a loop, it would look like this:
 ```{r}
-for (i in c('len', 'dose', 'new_column')) { # define what to iterate on
+for (i in c('OD', 'CFU', 'new_column')) { # define what to iterate on
   my_data_frame[[i]] <- my_data_frame[[i]]*1000
 }
 summary(my_data_frame)
@@ -145,6 +145,16 @@ a_normal_draw <- rnorm(n = 100, mean = 0, sd = 1)
 head(a_normal_draw)
 hist(a_normal_draw)
 ```
+
+## Hands on session 1
+#### Create a new script for your project
+#### Import your data
+#### Explore it
+#### Format your data (categorical data as factors)
+#### Subset, compute group means and sd
+#### Make a histogram of a numeric variable
+#### Make a dot plot with two variables (at least one numeric)
+#### Ask us how to do what you want to do !
 
 # Plots with ggplot (Tuesday)
 
