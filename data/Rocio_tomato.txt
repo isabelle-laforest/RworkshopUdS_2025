@@ -1,0 +1,7 @@
+L’objective du projet est de tester différentes molécules pour leur capacité soit de prévenir l’infection soit d’atténuer l’infection des diffèrent pathogènes végétaux.
+ 
+Mes données correspondent aux résultats d’infections de tomates après prétraitement avec une des molécules. Les deux variables sont : « treatment « (mock/treated) et « infection » (water/pathogen). Pour chaque cas (mock/water; mock/pathogen; treated/water; treated/pathogen) il y a trois plants et l’expérience a été répété 4 fois.
+ 
+Pour quantifier l’infection des photos de feuilles détachés de chaque plant sont prises. L’area total et l’area chlorotique de chaque feuille sont mesurées en utilisant un programme d’analyse d’image (mesure des zones jeunes). La couleur des tiges de feuilles correspond au couleur de chlorose, alors on a toujours un bruit de fond de « chlorose », même dans les plantes non infectées. Chaque valeur de tableau correspond à une plante (la somme de valeurs d’area total et chlorotique de toutes les feuilles d’un même plant).
+ 
+J’espère que l’information est claire et la façon de présenter les donnés correct pour les analyses à faire. Sinon je ferais les changements nécessaires.

@@ -1,0 +1,13 @@
+Voici un fichier qu’on pourrait utiliser pour ton atelier.  Ce sont lrs captures de kangourous.
+
+Quelques questions potentielles:
+
+Corrélations entre mesures pour le même individu, effet du sexe.
+
+Effets de l’âge
+
+Effets aléatoires possibles de l’ID fdu kangourou,  ‘Measurer’ et d’année.
+
+Plein de possibilités pour des graphiques.
+
+Il y a d’autres choses possibles, dis-moi si tu voudrais en discuter.

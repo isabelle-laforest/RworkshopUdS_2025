@@ -1,0 +1,59 @@
+En gros, je voulais évaluer les voies de régulation menant à l’expression de deux gènes (impliqué dans la formation de biofilm). Pour se faire, j’ai utilisé des plasmides rapporteurs (promoteur du gène qui m’intéressait suivi d’un opéron codant pour la luciférase). Se faisant, je peux voir rapidement l’expression du gène sans faire de RT-qPCR ou séquençage en mesurant l’émission de lumière.
+ 
+
+Maintenant pour identifier des voies impliquées dans la régulation, j’ai utilisé la librairie de mutants par insertion de transposon Nebraska (NTML). Cette collection est composée de 1920 mutants chez Staphylococcus aureus et chacun des mutants a un gène interrompu par un transposon. J’ai ensuite mesuré l’activité de mes plasmides rapporteurs dans chacune des souches via la lumière émise. Ainsi. En comparant l’émission de lumière de chacun des mutants, j’ai pu déterminer les gènes affectant l’expression de mes rapporteurs. Ceux-ci causent une hausse ou diminution significative du signal mesurer et les souches ne causant pas d’effet ne l’affectent pas.
+
+ 
+
+J’espère que la mise en contexte est relativement claire, je trouve difficile de décrire par écris, si vous voulez plus d’info ou clarté, ça me fera plaisir de vous éclairer 😉.
+
+ 
+
+Le fichier est construit comme suit :
+
+ 
+
+Colonne A-G : Identification des souches
+
+ 
+
+Colonne H à V : Résultats du 1er rapporteurs et analyse
+
+Colonne H : Nom de fichier du réplica 1
+
+Colonne I : Résultats du réplica 1
+
+Colonne J : OD associé au maximum d’expression du réplica 1 (valeur en I)
+
+Colonne K-L : Même chose que H-J, mais pour le réplica 2
+
+Colonne N-P : Même chose que H-J, mais pour le réplica 3 (s’il y a lieu)
+
+Colonne Q et suivante c’est des analyses des colonnes précédente
+
+ 
+
+Les colonne W à AH, même chose que pour les colonnes H à V, mais pour le second rapporteur
+
+ 
+
+Donc les colonnes « importante » du premier rapporteur sont les colonnes des valeurs d’expression (I, L, O) et les valeurs de DO associé (J, M, P). Pour le second rapporteurs, les colonnes de valeurs d’expression (X, AA) et (Y, AB) les DO associé.
+
+Peu de valeurs ont 3 replica car j’avais eu un problème et devait reprendre des échantillons (pour simplifier, on peut juste retirer ces colonnes.
+
+ 
+
+Il est a noté que toutes les valeurs sont « normalisées » par plaque pour permettre une comparaison interplaque.
+
+ 
+
+Les valeurs du fichier sont déjà « modifiées » et ne sont pas des données brutes.
+
+ 
+
+J’ai aussi des fichiers bruts de valeurs d’expression et de croissance (OD) dans le temps pour chacune des valeurs du fichier si vous pensez que ce genre de valeurs peut être plus facile pour des exercices.
+
+ 
+
+Merci et bonne journée,
+
