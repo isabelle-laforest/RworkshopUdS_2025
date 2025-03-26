@@ -158,7 +158,72 @@ hist(a_normal_draw)
 
 # Plots with ggplot (Tuesday)
 
-First, import real data
+We work with a real dataset where tomato plants have been infected (or not) with a pathogen. We want to look at the proportion of leaf area affected by chlorosis and compare it between the infected and control groups. 
+
+## Objective
+Plot the proportion of plant leaf covered by chlorosis with mean and standard devitions by replicate, in a way that will allow us to compare the two groups (infected and not infected) across the two treatments (mock of treated).
+
+Two packages are required here, make sure you have installed them:
+```{r}
+# install.packages('tidyverse') # super-package that includes ggplot
+# install.packages('openxlsx') # to parse excel files
+```
+
+## Preparing the data
+```{r}
+library(openxlsx)
+tomato <- read.xlsx('data/Rocio_tomato_infection.xlsx')
+str(tomato)
+
+```
+
+We have two character columns, which would be preferable to convert to factors. I have intentionnally introduced a typographic error in one of these character columns; factors will help us spot them quickly.
+```{r}
+tomato$Treatement <- as.factor(tomato$Treatement)
+tomato$Infection <- as.factor(tomato$Infection)
+tomato$rep <- as.factor(tomato$rep)
+summary(tomato)
+```
+
+That's one way to do it. But there is a different syntax we can use that comes from the `tidyverse` superpackage. It uses the pipe operator `%>%`, which you can generate by using the `shift+cmd+m` keyboard combination (or `shift+ctrl+m` on Windows). To familiarise yourself with it, let's do the same thing as above using this syntax:
+
+```{r}
+library(tidyverse)
+library(magrittr)
+
+tomato <- tomato %>% 
+  mutate(Treatement = as.factor(Treatement),
+         Infection = as.factor(Infection),
+         rep = as.factor(rep))
+summary(tomato)
+```
+
+It may not seem like we gained much in terms of amount of code to write. But consider the following things we might want to do as well: 
+
+1. The `Treatement` column name has an extra `e` in it, it should be `Treatment`
+2. There is a typo in one of the Infection values we want to correct
+3. We want to compute the proportion of the total area that is chlorotic
+
+We can do all of this in a single piped command, without needing to rewrite `tomato$columnName <- ...` every time. Let's do all these three things, starting again from the raw data.
+
+```{r}
+
+tomato <- read.xlsx('data/Rocio_tomato_infection.xlsx') %>% 
+  rename(Treatment = Treatement) %>% 
+  mutate(
+    Treatment = as.factor(Treatment), 
+    rep = as.factor(rep),
+    prop_chlorosis = 100*chlorotic.area/total.area,
+    Infection = as.factor(
+      case_when(
+        Infection == "pathogn" ~ "pathogen",
+        TRUE ~ Infection
+        ))
+    )
+
+summary(tomato)
+dim(tomato)
+```
 
 ## Preparing your data
 

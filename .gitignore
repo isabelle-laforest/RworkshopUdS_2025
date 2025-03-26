@@ -4,4 +4,6 @@ tmp/
 *.Rproj
 .Rproj.user
 .DS_Store
+~$*
+
 
