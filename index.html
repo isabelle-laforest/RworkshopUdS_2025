@@ -30,7 +30,10 @@
   
   <body>
     <section class="page-header">
-      <h1 class="project-name">LAFOREST LAB R WORKSHOP 2025: Learn, Visualize, and Analyze</h1>
+      <h1 class="project-name">
+  <div>LAFOREST LAB R WORKSHOP 2025</div>
+  <div class="tagline">Learn, Visualize, and Analyze</div>
+</h1>
       <h2 class="project-tagline"></h2>
       
         <a href="https://github.com/isabelle-laforest/RworkshopUdS_2025" class="btn">View on GitHub</a>
@@ -294,8 +297,14 @@
 }
 
 .project-name {
-  margin: 0 auto;
-  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.tagline {
+  font-size: 1.3rem;
+  font-weight: normal;
+  margin-top: 0.8rem;
 }
 
 .schedule-grid {
