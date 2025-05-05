@@ -125,8 +125,8 @@
   This schedule is a draft and might evolve depending on how things go.
 </p>
 
-<div class="row">
-  <div class="col-md-6">
+<div class="schedule-container">
+  <div class="day-column">
     <h3>Day 1 (D7-3017) AM Session 1</h3>
     <table class="table table-striped">
       <tr> <td>08:30</td>  <td>Launching the workshop</a></td> </tr>
@@ -141,7 +141,7 @@
   <p>
     
 </p>
-  <div class="col-md-6">  
+  <div class="day-column"> 
     <h3>Day 1 (D7-3017) PM Session 2</h3>
     <table class="table table-striped">
       <tr> <td>13:00</td>  <td>Subsets and plots</a></td> </tr>
@@ -156,7 +156,7 @@
     <p>
     
 </p>
-  <div class="col-md-6">
+  <div class="day-column">
     <h3>Day 2 (D7-3017) AM Session 3</h3>
     <table class="table table-striped">
       <tr> <td>08:30</td>  <td>Recap of day 1</a></td> </tr>
@@ -171,7 +171,7 @@
     <p>
     
 </p>
-  <div class="col-md-6">
+  <div class="day-column">
     <h3>Day 2 (D7-3017) PM Session 4</h3>
     <table class="table table-striped">
       <tr> <td>13:00</td>  <td>Making better plots</a></td> </tr>
@@ -185,7 +185,7 @@
   </div>
 
   </p>
-  <div class="col-md-6">
+  <div class="day-column">
     <h3>Day 3 (D7-3017) AM Session 5</h3>
     <table class="table table-striped">
       <tr> <td>08:30</td>  <td>Recap of day 2</a></td> </tr>
@@ -200,7 +200,7 @@
     <p>
     
 </p>
-  <div class="col-md-6">
+  <div class="day-column">
     <h3>Day 3 (D7-3017) PM Session 6</h3>
     <table class="table table-striped">
       <tr> <td>13:00</td>  <td>Correlations, regressions, and linear models</a></td> </tr>
@@ -296,15 +296,21 @@
       max-width: 800px;
     }
    
-.schedule-table {
-  width: 100%;
+.schedule-container {
+  display: flex;
+  gap: 2rem; /* Space between columns */
   margin-bottom: 2rem;
-  border-collapse: collapse;
 }
 
-.schedule-table td {
-  padding: 0.5rem;
-  border: 1px solid #e1e4e8;
+.day-column {
+  flex: 1; /* Makes columns equal width */
+}
+
+/* Responsive behavior - stacks on mobile */
+@media (max-width: 768px) {
+  .schedule-container {
+    flex-direction: column;
+  }
 }
   <style>
 
