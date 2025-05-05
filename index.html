@@ -296,20 +296,34 @@
       max-width: 800px;
     }
    
-.schedule-container {
-  display: flex;
-  gap: 2rem; /* Space between columns */
-  margin-bottom: 2rem;
+.schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 columns */
+  gap: 2rem; /* Space between items */
+  margin-bottom: 3rem;
 }
 
-.day-column {
-  flex: 1; /* Makes columns equal width */
+.day-container {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Responsive behavior - stacks on mobile */
+/* Add clear separation between days */
+.day-container:nth-child(3), 
+.day-container:nth-child(5) {
+  margin-top: 2rem;
+}
+
+/* Responsive: stack on mobile */
 @media (max-width: 768px) {
-  .schedule-container {
-    flex-direction: column;
+  .schedule-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .day-container {
+    margin-top: 1rem;
   }
 }
   <style>
