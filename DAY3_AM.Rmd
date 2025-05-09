@@ -1,0 +1,201 @@
+---
+title: "Day3_AM"
+output: html_document
+date: "2025-05-01"
+---
+
+## Packages
+Run the `install.packages()` if packages are not installed yet.
+```{r results='hide', message=FALSE}
+#install.packages("ggpubr")
+library(ggpubr)
+#install.packages("ggplot2")
+library(ggplot2)
+#install.packages("FSA")
+library(FSA)
+#install.packages("dunn.test")
+library(dunn.test)
+#install.packages("dplyr")
+library(dplyr)
+#install.packages("rstatix")
+library(rstatix)
+#install.packages("car")
+library(car)
+#install.packages("readxl")
+library(readxl)
+```
+
+## Compare the mean across more than two groups
+
+Let's use the Moss data set and plot the Nitrogen fixation (ARA_C2H4) across sampling months in 2017 independently for each moss species.
+
+```{r}
+# Load data
+Moss <- read_excel("data/Marie_Mosses.xlsx")
+# Transform some variables as factors
+Moss$Year <- as.factor(Moss$Year)
+Moss$Months <- factor(Moss$Months, levels = c("June","September","October"))
+# Subset to keep only data from 2017
+Moss2017 <- Moss[Moss$Year=="2017",]
+# Subset to keep only data from one moss specie
+Moss2017_PCC <- Moss2017[Moss2017$Species == "Ptilium crista-castrensis",]
+```
+
+```{r}
+# Plot it
+ggplot(data = Moss2017_PCC, aes(x = Months, y = ARA_C2H4, fill = Months))+
+  geom_boxplot()+
+  theme_bw()+
+  scale_fill_manual(values = c("green","green4", "darkgreen"))
+```
+
+We want to evaluate if there is a significant difference in the nitrogen fixation across time. Therefore, we want to compare the mean of 3 groups (June, September, October).
+
+## ANOVA (parametric)
+
+**Conditions to apply anova (parametric)** 
+
+1. Independent observation  
+2. Normality (`shapiro.test()`) 
+```{r}
+shapiro.test(Moss2017_PCC$ARA_C2H4[Moss2017_PCC$Months == "June"])
+# p>0.05: data is normal
+shapiro.test(Moss2017_PCC$ARA_C2H4[Moss2017_PCC$Months == "September"])
+# p>0.05: data is normal
+shapiro.test(Moss2017_PCC$ARA_C2H4[Moss2017_PCC$Months == "October"])
+# p>0.05: data is normal
+```
+3. Homogeneous variance (`leveneTest()`) 
+```{r}
+leveneTest(Moss2017_PCC$ARA_C2H4 ~ Moss2017_PCC$Months)
+# p>0.05: variances are not significantly different
+```
+#### Perform Anova
+```{r}
+# Using anova()
+res <- anova(lm(Moss2017_PCC$ARA_C2H4 ~ Moss2017_PCC$Months))
+res # No difference between groups (Months)
+
+# Using aov()
+res2 <- aov(Moss2017_PCC$ARA_C2H4 ~ Moss2017_PCC$Months)
+summary(res2) # No difference between groups (Months)
+```
+According to the anova, there is no difference between sampling months.  
+
+#### Tukey test (parametric post-hoc)
+If the anova had revealed a difference, we would have performed a Tukey test (parametric post-hoc) to know between which group there is a difference.
+```{r}
+# Difference between which groups?
+TukeyHSD(res2) # No difference between groups (Months)
+```
+## Kruskal-Wallis (non-parametric)
+
+Let's use the flowers data set and plot the alpha-diversity for each site (code)
+```{r}
+# Import dataset
+flowers <- read_excel("data/meta.flower.2022.xlsx")
+# Transform the variable code as factor
+flowers$code <- as.factor(flowers$code)
+
+# Plot alpha-diversity for each site (code)
+(plot.flower <- ggplot(flowers, aes(code, alphadiv, fill = code))+
+  geom_boxplot()+
+    theme_bw())
+```
+
+Test normality
+```{r}
+shapiro.test(flowers$alphadiv[flowers$code == "A"])
+# p>0.05: data is normal
+shapiro.test(flowers$alphadiv[flowers$code == "B1"])
+# p>0.05: data is NOT normal
+shapiro.test(flowers$alphadiv[flowers$code == "C"])
+# p>0.05: data is NOT normal
+```
+#### Perform Kruskal test
+```{r}
+kruskal_test(flowers, alphadiv~code)
+# there is a significant difference between some groups
+```
+
+#### Dunn test (non-parametric post-hoc)
+```{r}
+dunn_test(flowers, alphadiv~code)
+# Differences are between groups A-C and B1-C
+# No difference between groups A-B1
+```
+
+Let's plot the statistical result on the graph
+```{r}
+# Store dunn test result in an object
+dunn.res <- dunn_test(flowers, alphadiv~code)
+# Manually extract p-values from dunn test results
+p_values <- dunn.res$p.adj.signif[c(1, 2, 3)]  
+# Find x and y positions for the p-value
+stat.flower <- add_xy_position(dunn.res, x = "code")
+# List of comparison
+comparisons <- list(c("A", "B1"), c("A", "C"), c("B1", "C"))
+# Add on the graph
+plot.flower+
+  geom_signif(comparisons = comparisons,
+              annotations = p_values,
+              y_position = stat.flower$y.position) 
+```
+
+To conclude, if we want two compare the mean between more than two groups we first need to know if we use a parametric (Anova) or a non-parametric (Kruskal-Wallis) test. So we first test the normality of all group using `shapiro.test()` (p<0.05: Not normal; p>0.05 Normal) and the homogeneity of the variance using `leveneTest()`.  
+
+Depending on the results, we will perform an Anova or a Kruskal test. If the result of the Anova is significant, we then perform a post-hoc Tukey test. If the the result of the Kruskal test is dignificant, we then perform a post-hoc Dunn test.
+
+
+## Correlation between two variables
+
+### Pearson & Spearman
+
+Pearson = parametric  
+Spearman = non-parametric
+
+Test normality
+```{r}
+shapiro.test(Moss2017$Fe_ppm)
+# p<0.05: Not normal
+shapiro.test(Moss2017$P_ppm)
+# p>0.05 Normal
+shapiro.test(Moss2017$CN_Ratio)
+# p>0.05 Normal
+shapiro.test(Moss2017$`N_mg.g-1`)
+# p>0.05 Normal
+```
+Perform correlation test
+```{r}
+# Pearson (parametric)
+plot(Moss2017$P_ppm,Moss2017$CN_Ratio)
+cor.test(Moss2017$P_ppm, Moss2017$CN_Ratio, method = "pearson")
+# p<0.05: Reject H0 -> there is a correlation (r = -0.4)
+
+# Spearman (non-parametric)
+plot(Moss2017$Fe_ppm, Moss2017$P_ppm)
+cor.test(Moss2017$Fe_ppm, Moss2017$P_ppm, method = "spearman")
+# p<0.05: Reject H0 -> there is a correlation (r = -0.5)
+
+# Pearson (parametric)
+plot(Moss2017$`N_mg.g-1`, Moss2017$CN_Ratio)
+cor.test(Moss2017$`N_mg.g-1`, Moss2017$CN_Ratio, method = "pearson")
+# p<0.05: Reject H0 -> there is a correlation (r = -0.98)
+```
+
+Add correlation coefficient and p-value to the graph
+```{r}
+ggplot(Moss2017, aes(`N_mg.g-1`,CN_Ratio, add = "reg.line"))+
+  geom_point()+
+  theme_bw()+
+  geom_smooth(method = "lm")+
+  stat_cor(method = "pearson", label.x = 9, label.y = 63)
+```
+
+# Challenge #10  
+
+Test if there is a correlation between two other variables from the moss data set  
+- Test normality of both variables  
+- Perform appropriate correlation test  
+- Plot it and add correlation coefficient and p-value
+
