@@ -6,6 +6,8 @@ author: "Laforest-Lapointe Lab"
 ---
 
 ### Load Packages And Data
+This is a test to practice pushing modifications on scripts with GitHub.
+Test2
 
 #### Load packages   
 Run the `install.packages()` if packages are not installed yet.

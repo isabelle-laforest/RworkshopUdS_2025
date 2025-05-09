@@ -1,0 +1,118 @@
+---
+title: "Session 2: Subsets and Plots"
+author: "Isabelle Laforest-Lapointe"
+date: "2025-05-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Importing data
+
+First, you want to import your data.
+It is important to create objects with explicit and short names, that are not already built-in functions in R.
+Ex: do not create a data named data or summary or plot.
+
+```{r import}
+#tomato_data_2025_ILL_test_repeat<-read.csv("Rocio_tomato_modified.csv")
+tomato<-read.csv("Rocio_tomato_modified.csv")
+```
+## Exploring data
+
+The function summary() is very useful to explore what is in your data and also to confirm that your data was imported well.
+
+```{r summary}
+summary(tomato)
+```
+The head() and View() functions are also good ways to take a peek at your data.
+
+```{r head}
+head(tomato)
+```
+## Formatting
+
+Next, you will want to make sure that your variables are formatted adequately.
+Here, we have variables that are numeric (allowing for mathematical operations) and some that are factors (with levels).
+We will transform some in factors and take a look at the summary() to confirm the successful transformation.
+
+```{r transform}
+tomato$rep<-as.factor(tomato$rep)
+tomato$Treatement<-as.factor(tomato$Treatement)
+tomato$Infection<-as.factor(tomato$Infection)
+summary(tomato)
+```
+We can observe quickly that a typo is now present in our data.
+We could either correct it in the raw data file and reimport a new object, or correct it in R using the which() function and dimensionality operators.
+
+```{r error}
+which(tomato$Infection=="pathogn") #find the position of the error in the variable
+tomato$Infection[10] #confirm that this is the error
+tomato$Infection[10]<-"pathogen" #correct the error FOREVER by overwritting
+tomato$Infection<-droplevels(tomato$Infection) #erase the empty factor level
+summary(tomato) #check the summary again
+```
+## Visualizing the data
+
+Histograms are a fundamental tool in R for exploratory data analysis (EDA). They help you:
+
+**Visualize Distributions:** Quickly see the shape of your data (e.g., normal, skewed, bimodal).
+**Spot Outliers & Gaps:** Identify unusual values or missing ranges in your dataset.
+**Check Assumptions:** Assess if data meets statistical assumptions (e.g., normality for t-tests).
+**Compare Groups:** Overlay histograms to compare different subsets (e.g., treatment vs. control).
+
+In R, creating a histogram is simple (e.g., hist(data)), making it an essential first step in understanding your data before diving into analysis.
+
+```{r hist}
+hist(tomato$total.area)
+```
+
+Scatterplot and boxplots are also very common graphs to be performed to explore the data.
+Here are a few exemples:
+
+```{r plot}
+par(mfrow=c(2,2))
+plot(tomato$total.area~tomato$Treatement)
+#plot(total.area~Treatement,data=tomato) #this is the same
+plot(tomato$total.area~tomato$Infection)
+plot(tomato$total.area~tomato$Infection)
+```
+
+What happens with an interaction?
+
+```{r interaction}
+plot(total.area~Infection*Treatement, data=tomato)
+```
+
+Here is a scatterplot:
+
+```{r scatterplot}
+plot(total.area~chlorotic.area, data=tomato)
+```
+
+You can apply transformation in your plot formula:
+
+```{r log}
+plot(log(tomato$total.area)~tomato$Infection)
+plot(I(tomato$total.area/100000)~tomato$Infection)
+```
+
+We can create new variables that combine Treatement and Infection as well as the ratio between both areas, then use it for plotting:
+
+```{r combo}
+tomato$combo<-as.factor(paste(tomato$Treatement,tomato$Infection,sep=""))
+tomato$rate<-tomato$chlorotic.area/tomato$total.area
+tomato$combo<-factor(tomato$combo,levels=levels(tomato$combo)[c(2,1,4,3)]) #here we reorder the levels
+plot(tomato$rate~tomato$combo)
+```
+
+## Challenge 3
+
+Create a new dataset from tomato but excluding rep #5.
+
+Plot side-by-side the histogram of total.area with and without rep 5, as well as chlorotic.area with and without rep 5.
+
+## Bonus
+
+Create a dataset for each rep and plot the ratio between chlorotic.area/total.area for the for combined levels (combo).
