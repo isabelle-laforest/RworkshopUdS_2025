@@ -87,7 +87,7 @@ plot(total.area~Infection*Treatement, data=tomato)
 
 Here is a scatterplot:
 
-```{r interaction}
+```{r scatterplot}
 plot(total.area~chlorotic.area, data=tomato)
 ```
 
@@ -106,3 +106,13 @@ tomato$rate<-tomato$chlorotic.area/tomato$total.area
 tomato$combo<-factor(tomato$combo,levels=levels(tomato$combo)[c(2,1,4,3)]) #here we reorder the levels
 plot(tomato$rate~tomato$combo)
 ```
+
+## Challenge 3
+
+Create a new dataset from tomato but excluding rep #5.
+
+Plot side-by-side the histogram of total.area with and without rep 5, as well as chlorotic.area with and without rep 5.
+
+## Bonus
+
+Create a dataset for each rep and plot the ratio between chlorotic.area/total.area for the for combined levels (combo).
