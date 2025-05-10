@@ -7,7 +7,7 @@ output:
       collapsed: true
     toc_depth: 3
     number_sections: true
-    theme: lumen
+    theme: cosmo
     highlight: tango
 author: "Isabelle Laforest-Lapointe, Amy Heim, Sophie Boutin, Jonathan Rondeau-Leclaire"
 ---
@@ -74,7 +74,7 @@ R has a bunch of symbols with specific functions. Some are absolutely essential 
 
 - `$` access an element of an object by its name (e.g. the column of a data frame)  
 - `[]` access an element of an object by its index (e.g. `vector[3]` accesses the 3rd element in than vector)  
-- `<-` assign an object  
+- `<-` assign an object (shortcut: `alt` + `-` on Windows, `option`+ `-` on mac)  
 - `=` assign an object; specify function parameters  
 - `""` and `''` are used to express strings (character values) 
 - `?` used to learn how a function work. `?sum` will open a help file where you can learn about how to use that function.
@@ -133,7 +133,7 @@ We can also see a composite class, `data.frame`. These are used for more complex
 `Data frame`  
 `Matrix`  
 
-Let's create a few objects and look at the class R will assign them by default, using functions like `c()` and `class()`. Functions are little programs that do specific things and you'll be using them all the time.
+Let's create a few objects and look at the class R will assign them by default. There are a few basic functions worth learning about at this point. Functions are little programs that do specific things and you'll be using them all the time. The most basic function is `c()` which is used to combine its arguments into a vector. If all arguments are numeric, the vector will be numeric. If they contain at least one string element (wrapped in `"quotes"`), it will be a character vector. 
 
 ```{r}
 # Create a vector of numeric values
@@ -180,7 +180,7 @@ Create the following objects with 4 made-up values each:
 
 Then,  
 
-1. combine these into a data frame and give them a sensible class 
+1. combine these into a data frame
 2. using `str()`, check the class of your data frame columns
 4. Save your dataframe as an RDS file
 
@@ -212,11 +212,6 @@ It will be saved in that directory without needing to specify the absolute path.
 In any project, a first step should always be to look at your data as it appears in R. Many functions exist to help you do that. `summary()` will summarise variables in a class-dependent manner: numeric variables get a numeric summary (median, range, etc.), factors and logical get a count per category, and characters get a overview of the first values.
 
 ```{r, warning = FALSE, message = FALSE}
-dir.create('data')
-download.file(
-  url = 'https://raw.githubusercontent.com/isabelle-laforest/RworkshopUdS_2025/refs/heads/main/data/assay.txt', 
-  destfile = 'data/assay.txt'
-  )
 assay <- read.table("data/assay.txt", header = TRUE)
 summary(assay)
 ```
@@ -240,12 +235,11 @@ length(assay$OD) # check the length of a vector (a column fetched using $ is a v
 
 R can be used to operate on values in pretty much any way imaginable, from very simple things like calculating the mean to more complex things like removing certain characters from every values in a data frame variable.
 
-There are a few basic functions worth knowing, as they can come in handy in many different situations. The very basic one is `c()` which is used to combine its arguments into a vector. If all arguments are numeric, the vector will be numeric. If they is at least one string (using `"double quotes"`), it will be a character vector.
-
 Most mathematical operations are available as functions :
 
 ```{r math ops}
 some_numbers <- head(assay$CFU)
+some_numbers
 sum(some_numbers) # Sum the values of a numeric vector
 sqrt(some_numbers) # square root of each value
 sum(some_numbers)/length(some_numbers) # compute the mean "manually"
@@ -323,7 +317,123 @@ head(a_normal_draw)
 hist(a_normal_draw)
 ```
 
-## Afternoon session w/ isa
+# Do's and don'ts
+
+## Importing new data
+
+Often we save our data in excel files. We can install a package to get a new function specialised in reading excel files by running `install.packages('readxl')`. Once you've done this, add the following line at the top of your script:
+
+```{r}
+library(readxl) # you need execute this every time you open R
+```
+
+It is important to create objects with explicit and short names, that are not already built-in functions in R. Ex: do not create a data named `data` or `summary` or `plot`. 
+
+```{r import}
+#tomato_data_2025_ILL_test_repeat<-read.csv("Rocio_tomato_modified.csv")
+tomato <- read_xlsx('data/Rocio_tomato_modified.xlsx')
+#tomato<-read.csv("data/Rocio_tomato_modified.csv")
+```
+
+Let's look at this new dataset:
+
+```{r}
+head(tomato)
+summary(tomato)
+```
+
+## Formatting
+
+Next, you will want to make sure that your variables are formatted adequately.
+Here, we have variables that are numeric (allowing for mathematical operations) and some that are factors (with levels).
+We will transform some in factors and take a look at the summary() to confirm the successful transformation.
+
+```{r transform}
+tomato$rep<-as.factor(tomato$rep)
+tomato$Treatement<-as.factor(tomato$Treatement)
+tomato$Infection<-as.factor(tomato$Infection)
+summary(tomato)
+```
+We can observe quickly that a typo is now present in our data.
+We could either correct it in the raw data file and reimport a new object, or correct it in R using the which() function and dimensionality operators.
+
+```{r error}
+which(tomato$Infection=="pathogn") #find the position of the error in the variable
+tomato$Infection[10] #confirm that this is the error
+tomato$Infection[10]<-"pathogen" #correct the error FOREVER by overwritting
+tomato$Infection<-droplevels(tomato$Infection) #erase the empty factor level
+summary(tomato) #check the summary again
+```
+## Visualizing the data
+
+Histograms are a fundamental tool in R for exploratory data analysis (EDA). They help you:
+
+**Visualize Distributions:** Quickly see the shape of your data (e.g., normal, skewed, bimodal).
+**Spot Outliers & Gaps:** Identify unusual values or missing ranges in your dataset.
+**Check Assumptions:** Assess if data meets statistical assumptions (e.g., normality for t-tests).
+**Compare Groups:** Overlay histograms to compare different subsets (e.g., treatment vs. control).
+
+In R, creating a histogram is simple (e.g., hist(data)), making it an essential first step in understanding your data before diving into analysis.
+
+```{r hist}
+hist(tomato$total.area)
+```
+
+```{r hist2}
+par(mfrow=c(1,2))# Create a 1 x 2 plotting matrix
+hist(tomato$total.area)
+hist(tomato$chlorotic.area)
+```
+
+Scatterplot and boxplots are also very common graphs to be performed to explore the data. Here are a few examples:
+
+```{r plot}
+par(mfrow=c(2,2))# Create a 2 x 2 plotting matrix
+# The next 4 plots created will be plotted next to each other
+plot(tomato$total.area~tomato$Treatement)
+plot(total.area~Treatement, data=tomato) #this is the same but the XY labels change
+plot(total.area~Infection, data=tomato)
+plot(chlorotic.area~Infection, data=tomato)
+```
+
+What happens with an interaction?
+
+```{r interaction}
+plot(total.area~Infection*Treatement, data=tomato)
+```
+
+Here is a scatterplot:
+
+```{r scatterplot}
+plot(total.area~chlorotic.area, data=tomato)
+```
+
+You can apply transformation in your plot formula:
+
+```{r log}
+par(mfrow=c(1,2))
+plot(log(total.area)~Infection,data=tomato)
+plot(I(total.area/100000)~Infection,data=tomato)
+```
+
+We can create new variables that combine Treatement and Infection as well as the ratio between both areas, then use it for plotting:
+
+```{r combo}
+tomato$combo<-as.factor(paste(tomato$Treatement,tomato$Infection,sep=""))
+tomato$rate<-tomato$chlorotic.area/tomato$total.area
+tomato$combo<-factor(tomato$combo,levels=levels(tomato$combo)[c(2,1,4,3)]) #here we reorder the levels
+plot(rate~combo,data=tomato)
+```
+
+## Challenge 3
+
+Create a new dataset from tomato but excluding rep #5.
+
+Plot side-by-side the histogram of total.area with and without rep 5, as well as chlorotic.area with and without rep 5.
+
+## Bonus
+
+Create a dataset for each rep and plot the ratio between chlorotic.area/total.area for the for combined levels (combo).
 
 ## Hands on session 1
 
