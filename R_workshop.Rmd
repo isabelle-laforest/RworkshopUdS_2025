@@ -162,7 +162,7 @@ str(df1)
 
 ## Save an object
 
-```{r}
+```
 # Save object
 saveRDS(df1, "df1.RDS")
 # Read/open object

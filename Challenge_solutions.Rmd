@@ -1,0 +1,30 @@
+---
+title: "Solutions"
+output: html_document
+date: "2025-05-10"
+---
+
+
+<details>
+<summary>**Click to see an example solution!**</summary>
+
+```{r, echo=TRUE}
+# Create 
+sample_id = c("sample1", "sample2", "sample3", "sample4")
+CFU = c(20, 200, 2000, 3000)
+Control = c(TRUE, FALSE, FALSE, FALSE)
+Date = c('2025-03-03', '2025-03-04', '2025-03-05', '2025-03-06')
+
+my_first_data_frame <- data.frame(
+  sample_id = sample_id,
+  CFU = CFU,
+  Control = Control,
+  Date = as.Date(Date)
+)
+my_first_data_frame$CFU_multiplied <- my_first_data_frame$CFU*100
+
+str(my_first_data_frame)
+saveRDS(my_first_data_frame, "my_first_data_frame.RDS")
+```
+
+</details>
