@@ -101,6 +101,7 @@ plot(total.area~chlorotic.area, data=tomato)
 You can apply transformation in your plot formula:
 
 ```{r log}
+par(mfrow=c(1,2))
 plot(log(total.area)~Infection,data=tomato)
 plot(I(total.area/100000)~Infection,data=tomato)
 ```
