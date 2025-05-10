@@ -7,7 +7,7 @@ output:
       collapsed: true
     toc_depth: 3
     number_sections: true
-    theme: cerulean
+    theme: lumen
     highlight: tango
 author: "Isabelle Laforest-Lapointe, Amy Heim, Sophie Boutin, Jonathan Rondeau-Leclaire"
 ---
@@ -169,56 +169,54 @@ saveRDS(df1, "df1.RDS")
 df1_new <- readRDS("df1.RDS")
 ```
 
-## Challenge
+## Challenge N˚1  
 
 Create the following objects with 4 made-up values each:  
 
 - `sample_id`: a character vector 
-- `CFU`: a numeric vector
-- `Control`: a boolean vector telling us which samples are controls
-- `Date` : a vector of dates with format "YYYY-MM-DD"
+- `CFU`: a numeric vector  
+- `Control`: a boolean vector telling us which samples are controls  
+- `Date` : a vector of dates with format "YYYY-MM-DD"  
 
-Then, 
+Then,  
 
 1. combine these into a data frame and give them a sensible class 
-2. Multiply the CFU column by 1000 and save it as a new column
-3. using `str()`, check the class of your data frame columns
+2. using `str()`, check the class of your data frame columns
 4. Save your dataframe as an RDS file
-
-<details>
-<summary>**Click to see an example solution!**</summary>
-
-```{r, echo=TRUE}
-# Create 
-sample_id = c("sample1", "sample2", "sample3", "sample4")
-CFU = c(20, 200, 2000, 3000)
-Control = c(TRUE, FALSE, FALSE, FALSE)
-Date = c('2025-03-03', '2025-03-04', '2025-03-05', '2025-03-06')
-
-my_first_data_frame <- data.frame(
-  sample_id = sample_id,
-  CFU = CFU,
-  Control = Control,
-  Date = as.Date(Date)
-)
-my_first_data_frame$CFU_multiplied <- my_first_data_frame$CFU*100
-
-str(my_first_data_frame)
-saveRDS(my_first_data_frame, "my_first_data_frame.RDS")
-
-```
-</details>
-
 
 # Getting started with data
 
-In this tutorial we'll import a small dataset and familiarise ourselves with a few functions that will help us look at our data.
+Now let's import a small dataset and familiarise ourselves with a few functions that will help us look at our data in more detail.
+
+## Working directory
+
+It's good to have a working directory specifically dedicated to your project, where you store your data, scripts, output, etc. This way you can organise what goes in and comes out of R and keep track of your various scripts.
+
+R can look anywhere in our computer for files. However, to load a file, you need to know its full path, e.g. `'/Users/jorondo/Repos/RworkshopUdS_2025/data.txt'` which can be annoying to write out. Instead, it's useful to set your working directory once at the beginning of your script, and then use relative paths to find your file. To do this, start by creating a folder in your computer, from where to work:
+
+```
+dir.create('~/Rworkshop2025') # Note that paths are always quoted  
+setwd('~/RWorkshop2025')
+dir.create('Output')
+```
+The `~` is a shortcut to your Home folder. You can always create your folders by hand, but it helps to have the path in your script. Now, if we save an object we previously created,
+
+```
+saveRDS(my_first_data_frame, "Output/my_first_data_frame.RDS")
+```
+
+It will be saved in that directory without needing to specify the absolute path.
 
 ## Data inspection
 
 In any project, a first step should always be to look at your data as it appears in R. Many functions exist to help you do that. `summary()` will summarise variables in a class-dependent manner: numeric variables get a numeric summary (median, range, etc.), factors and logical get a count per category, and characters get a overview of the first values.
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
+dir.create('data')
+download.file(
+  url = 'https://raw.githubusercontent.com/isabelle-laforest/RworkshopUdS_2025/refs/heads/main/data/assay.txt', 
+  destfile = 'data/assay.txt'
+  )
 assay <- read.table("data/assay.txt", header = TRUE)
 summary(assay)
 ```
@@ -234,8 +232,8 @@ Other useful checks are `dim()` or `length()`, especially when playing with func
 ```{r dim}
 dim(assay) # shows the dimensions of matrices and data frames
 ncol(assay) # number of columns
-colnames(assay) # column (variable) names
-length(assay$OD) # shows the length of vectors
+colnames(assay) # column names (our variable names!)
+length(assay$OD) # check the length of a vector (a column fetched using $ is a vector)
 ```
 
 ## Basic operations
@@ -260,9 +258,8 @@ min(some_numbers) # find the minimum
 Operations can also be done between columns of a data frame. In the following, we multiply two columns together and add the resulting vector as a new column on the same dataset using the `<-` (assignment) operator.
 
 ```{r}
-vector_mutiplication <- assay$CFU * assay$OD
-assay$new_column <- vector_mutiplication # add as a column
-assay[['new_column']] <- vector_mutiplication # equivalent
+assay$new_column <- assay$CFU * assay$OD # with $ sign
+assay['new_column'] <- assay$CFU * assay$OD # equivalent!
 summary(assay) 
 ```
 
@@ -288,17 +285,11 @@ summary(my_data_frame)
 
 It may not be useful for such a simple operation on only a few columns, but you can imagine how much time would be saved if the operations you do are more complex and need to be applied to multiple columns. Moreover, if you realise you need to multiply by 100 instead, you only have to change in one place, reducing the risk of syntax error.
 
-### Challenge N˚1
+## Challenge N˚2
 
-Load 
 
-```{r}
 
-```
-
-### Introduce a challenge !!! using loops??&
-
-### R as a calculator
+## R as a calculator
 
 You can also straight up use R as you would a calculator. Let's find the area of a single slice of a 14" pizza cut in 8, then format the result to be more "readable" :
 
