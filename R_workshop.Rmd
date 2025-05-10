@@ -7,7 +7,8 @@ output:
       collapsed: true
     toc_depth: 3
     number_sections: true
-    theme: cosmo
+    theme: cerulean
+    highlight: tango
 author: "Isabelle Laforest-Lapointe, Amy Heim, Sophie Boutin, Jonathan Rondeau-Leclaire"
 ---
 
@@ -17,31 +18,206 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This tutorial was created for a 3-day free R introduction workshop organized by the [Laforest-Lapointe Lab](https://www.laforestlab.com/) at Université de Sherbrooke on May 12th-14th.
 
-# The Basics (Monday)
+# Introduction
 
-\*\* Show how to import a "perfect" dataset\*
+R is an object-oriented programming language. Essentially, this means that data, values, inputs and outputs are saved as "objects" whose names are defined by the user. Objects can then be used to perform calculations, data manipulation, or visualisations.
+
+## RStudio Environment
+
+RStudio is a program that allows you to write a series of command as a script, have R execute these commands, visualise the output and see the objects that you create.
+
+When you open RStudio for the first time, you will have three panels.
+
+**Top left: Script**
+
+Document where you will write the command lines. To create a script: `File > New File > R Script`. Save regularly!
+
+Execute commands, place your cursor in the command's line and press: `Command + Enter` for Mac, `Control + Enter` for Windows.
+
+**Bottom left: Console **
+
+Where the output of the command line will appear. When you execute commands from the script, the command and its output (or error messages!) will appear there.
+
+Use it to execute commands that you do not want to save in the script or to test your commands before adding them to the script. To execute a command from the console, simply press `enter` after writing it.
+
+**Top right: Environment**
+
+Place where all the objects you create (dataframes, values, vectors) are shown. Click on any object to visualise it.
+
+**Bottom right: Files, Plots, Help**
+
+This is a files and plots viewer as well as the help center.
+
+## Basic R usage
+
+Use R script as a calculator and get the output from the console:
+```{r}
+# Everything written after a hashtag is a comment (cannot be executed)
+2+4
+```
+
+Store the output in an object
+```{r}
+res <- 2+4
+res
+```
+
+Multiply the result
+```{r}
+2*res
+```
+
+## Syntax
+R has a bunch of symbols with specific functions. Some are absolutely essential to know, which we present here.
+
+### Common symbols
+
+- `$` access an element of an object by its name (e.g. the column of a data frame)  
+- `[]` access an element of an object by its index (e.g. `vector[3]` accesses the 3rd element in than vector)  
+- `<-` assign an object  
+- `=` assign an object; specify function parameters  
+- `""` and `''` are used to express strings (character values) 
+- `?` used to learn how a function work. `?sum` will open a help file where you can learn about how to use that function.
+
+### Comparison operators
+To compare values to one another:
+
+- `==` equal  
+- `!=` is not equal  
+
+The following can only be used for numeric values:
+
+- `<` smaller than  
+- `>` greater than    
+- `<=` smaller or equal to  
+- `>=` greater or equal to  
 
 ```{r}
-assay <- read.table("data/assay.txt", header = TRUE)
+5 > 6
+5 <= 6
 ```
 
-## Data classes
+``TRUE`` and ``FALSE`` are boolean values with a specific meaning. They represent a type of information that can only be true or false. 
 
-Objects and object components (e.g., data frame variables) always have a class. This class gives you a hint on how it will behave. You can check the class of any object this way:
-
-```{r data class}
-#SOPHIES CODE
+```{r}
+5 != 4+1
 ```
 
-There exist many classes, but a few are much more common than others. In the above example with `str()`, we can see two other classes, namely `num` for numeric vectors and `factor`, which is a special (composite) class for categorical data. Other common classes are `character` (chr), `integer` (int), `character` (chr) and `logical` (logi).
+### Logical operators
+  
+- `&` and  
+- `|` or
+
+They are used to test multiple conditions at once
+```{r}
+(5 == 5) & (6 == 6)
+(5 == 4) & (6 == 6)
+(5 == 4) | (6 == 6)
+```
+
+## Object classes
+
+Objects and object components (e.g., data frame variables) always have a class. This class gives you a hint on how it will behave.
+
+There exist many object classes, but a few are much more common than others. In the above example with `str()`, we can see two other classes, namely `num` for numeric vectors and `factor`, which is a special (composite) class for categorical data. Other common classes are `character` (chr), `integer` (int), `character` (chr) and `logical` (logi).
 
 We can also see a composite class, `data.frame`. These are used for more complex objects, usually with two dimensions. Other composite classes include `matrix`, which are similar to data frames (the difference between these two is that data frames can contain elements of various classes). There are also `list` and `array`, which won't be covered in this course.
 
-## Data overview
+`Character`  
+`Numeric`  
+`Integer`  
+`Factor`  
+`Logical`  
+`Date`  
+`Vector`  
+`Data frame`  
+`Matrix`  
+
+Let's create a few objects and look at the class R will assign them by default, using functions like `c()` and `class()`. Functions are little programs that do specific things and you'll be using them all the time.
+
+```{r}
+# Create a vector of numeric values
+vec1 <- c(1,3,5)
+
+# Create a vector of characters values
+vec2 <- c("one","three","five")
+
+# Create a vector of logical values
+vec3 <- c(TRUE, TRUE, FALSE)
+
+# Bind these vectors into a dataframe
+df1 <- data.frame(vec1, vec2, vec3)
+class(vec1) # Use function class( ) to get the class of an object
+class(vec2)
+
+# Change the class of vec2 to factor
+vec2 <- as.factor(vec2) 
+vec2
+class(vec2)
+class(df1)
+
+# Look at the structure of the data frame we made:
+str(df1)
+```
+
+## Save an object
+
+```{r}
+# Save object
+saveRDS(df1, "df1.RDS")
+# Read/open object
+df1_new <- readRDS("df1.RDS")
+```
+
+## Challenge
+
+Create the following objects with 4 made-up values each:  
+
+- `sample_id`: a character vector 
+- `CFU`: a numeric vector
+- `Control`: a boolean vector telling us which samples are controls
+- `Date` : a vector of dates with format "YYYY-MM-DD"
+
+Then, 
+
+1. combine these into a data frame and give them a sensible class 
+2. Multiply the CFU column by 1000 and save it as a new column
+3. using `str()`, check the class of your data frame columns
+
+<details>
+<summary>**Click to see an example solution!**</summary>
+
+```{r, echo=TRUE}
+# Create 
+sample_id = c("sample1", "sample2", "sample3", "sample4")
+CFU = c(20, 200, 2000, 3000)
+Control = c(TRUE, FALSE, FALSE, FALSE)
+Date = c('2025-03-03', '2025-03-04', '2025-03-05', '2025-03-06')
+
+my_first_data_frame <- data.frame(
+  sample_id = sample_id,
+  CFU = CFU,
+  Control = Control,
+  Date = as.Date(Date)
+)
+my_first_data_frame$CFU_multiplied <- my_first_data_frame$CFU*100
+
+str(my_first_data_frame)
+
+```
+</details>
+
+
+# Getting started with data
+
+In this tutorial we'll import a small dataset and familiarise ourselves with a few functions that will help us look at our data.
+
+## Data inspection
 
 In any project, a first step should always be to look at your data as it appears in R. Many functions exist to help you do that. `summary()` will summarise variables in a class-dependent manner: numeric variables get a numeric summary (median, range, etc.), factors and logical get a count per category, and characters get a overview of the first values.
 
-```{r summary}
+```{r}
+assay <- read.table("data/assay.txt", header = TRUE)
 summary(assay)
 ```
 
