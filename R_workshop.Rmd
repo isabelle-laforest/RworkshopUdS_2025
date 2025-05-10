@@ -18,9 +18,15 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This tutorial was created for a 3-day free R introduction workshop organized by the [Laforest-Lapointe Lab](https://www.laforestlab.com/) at Université de Sherbrooke on May 12th-14th.
 
-# Introduction
+# Day 1
 
 R is an object-oriented programming language. Essentially, this means that data, values, inputs and outputs are saved as "objects" whose names are defined by the user. Objects can then be used to perform calculations, data manipulation, or visualisations.
+
+## Objectives
+
+1. Familiarise ourseves with RStudio
+2. Learn the syntax of the R language
+3. Learn to work with objects
 
 ## RStudio Environment
 
@@ -48,29 +54,46 @@ Place where all the objects you create (dataframes, values, vectors) are shown. 
 
 This is a files and plots viewer as well as the help center.
 
-## Basic R usage
+## Syntax
 
-Use R script as a calculator and get the output from the console:
+### Basic R usage
+
+The very simplest thing you can do is use R as a calculator and get the output from the console:
 ```{r}
 # Everything written after a hashtag is a comment (cannot be executed)
 2+4
 ```
 
-Store the output in an object
+But we like to do more exciting things. Generally, we save values in objects and then execute operations on those objects. 
+
+Most R operations are written like this:
+
+```
+an_object <- a_value
+```
+
+This stores a value in an object named an_object. The value can be, for example, a single number, a character string, or a complex object like a matrix or a list. It can be user-written ("hardcoded") like above, or be the output of a function, such as:
+
+```
+an_object <- a_function(values, some_parameters)
+```
+In this case, the function takes values as an input, applies operations to it, and spits out new values. Parameters are generally optional ways to control the behaviour of the function. Concrete examples will be presented in the next few sections.
+
 ```{r}
+# Store the output in an object
 res <- 2+4
 res
 ```
 
-Multiply the result
+
 ```{r}
+# Multiply the result 
 2*res
 ```
 
-## Syntax
-R has a bunch of symbols with specific functions. Some are absolutely essential to know, which we present here.
+### Useful symbols
 
-### Common symbols
+R uses many characters that have a specific role. Some are essential to know, which we present in this section.
 
 - `$` access an element of an object by its name (e.g. the column of a data frame)  
 - `[]` access an element of an object by its index (e.g. `vector[3]` accesses the 3rd element in than vector)  
@@ -80,6 +103,7 @@ R has a bunch of symbols with specific functions. Some are absolutely essential 
 - `?` used to learn how a function work. `?sum` will open a help file where you can learn about how to use that function.
 
 ### Comparison operators
+
 To compare values to one another:
 
 - `==` equal  
@@ -182,13 +206,14 @@ Then,
 
 1. combine these into a data frame
 2. using `str()`, check the class of your data frame columns
-4. Save your dataframe as an RDS file
+3. Save your dataframe as an RDS file
+4. Execute it from top to bottom and save it
 
-# Getting started with data
+## Getting started with data
 
 Now let's import a small dataset and familiarise ourselves with a few functions that will help us look at our data in more detail.
 
-## Working directory
+### Working directory
 
 It's good to have a working directory specifically dedicated to your project, where you store your data, scripts, output, etc. This way you can organise what goes in and comes out of R and keep track of your various scripts.
 
@@ -207,7 +232,7 @@ saveRDS(my_first_data_frame, "Output/my_first_data_frame.RDS")
 
 It will be saved in that directory without needing to specify the absolute path.
 
-## Data inspection
+### Data inspection
 
 In any project, a first step should always be to look at your data as it appears in R. Many functions exist to help you do that. `summary()` will summarise variables in a class-dependent manner: numeric variables get a numeric summary (median, range, etc.), factors and logical get a count per category, and characters get a overview of the first values.
 
@@ -231,7 +256,7 @@ colnames(assay) # column names (our variable names!)
 length(assay$OD) # check the length of a vector (a column fetched using $ is a vector)
 ```
 
-## Basic operations
+### Basic operations
 
 R can be used to operate on values in pretty much any way imaginable, from very simple things like calculating the mean to more complex things like removing certain characters from every values in a data frame variable.
 
@@ -307,6 +332,8 @@ library(readxl) # you need execute this every time you open R
 ```
 
 It is important to create objects with explicit and short names, that are not already built-in functions in R. Ex: do not create a data named `data` or `summary` or `plot`. 
+
+Let's load a new dataset to work with (found on the [Workshop repository](https://github.com/isabelle-laforest/RworkshopUdS_2025/tree/main/data) )
 
 ```{r import}
 #tomato_data_2025_ILL_test_repeat<-read.csv("Rocio_tomato_modified.csv")
@@ -452,11 +479,11 @@ It may not seems like much of a gain, but imagine if you had multiple levels to 
 3. Rerun your loop, but this time instead of printing to the console, save the values in a matrix. Hint: you can create an empty matrix with the appropriate dimensions and fill it using the loop and row/columns indices.
 
 
-# Plots with ggplot2
+# Day 2
 
 ## Objectives
 
-1. Learn the tidyverse syntax
+1. Learn the tidyverse syntax as an intutive way to prepare our datasets
 
 2. Plot the proportion of plant leaf covered by chlorosis with mean and standard devitions by replicate, in a way that will allow us to compare the two groups (infected and not infected) across the two treatments (mock of treated).
 
@@ -467,16 +494,16 @@ install.packages('kableExtra')
 
 ## The tidyverse syntax
 
+Yesterday, we covered functions that are included "by default" in R, what we call the Base R language. Over time, a large library of functions was developed, called `tidyverse.` These functions let you modify your data in a very intuitive manner. We'll start over with the tomato dataset, get it ready for plotting. 
+
 ```{r load-packages, include=FALSE}
 library(pacman)
 p_load(tidyverse, openxlsx, kableExtra)
 ```
 
 ```{r}
-
 tomato <- read.xlsx('data/Rocio_tomato.xlsx')
 str(tomato)
-
 ```
 
 We introduce a modern syntax from the `tidyverse` superpackage, which uses the pipe operator `%>%`. You can print it by using the `shift+cmd+m` keyboard combination (or `shift+ctrl+m` on Windows).
@@ -580,6 +607,7 @@ dim(tomato_mdf)
 We could go further and modify text values in our dataset. For example, we might want to capitalise the first letter of `pathogen`. We could use a case_when(), but if we want to capitalise all values in our variables, it becomes cumbersome. Instead, we can use one of the many string manipulation verbs in the `tidyverse` package.
 
 ```{r}
+library(magrittr)
 tomato_mdf %<>% 
   mutate(
     Infection = str_to_title(Infection),
