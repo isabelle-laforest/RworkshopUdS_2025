@@ -68,15 +68,22 @@ In R, creating a histogram is simple (e.g., hist(data)), making it an essential 
 hist(tomato$total.area)
 ```
 
+```{r hist2}
+par(mfrow=c(1,2))# Create a 1 x 2 plotting matrix
+hist(tomato$total.area)
+hist(tomato$chlorotic.area)
+```
+
 Scatterplot and boxplots are also very common graphs to be performed to explore the data.
 Here are a few exemples:
 
 ```{r plot}
-par(mfrow=c(2,2))
+par(mfrow=c(2,2))# Create a 2 x 2 plotting matrix
+# The next 4 plots created will be plotted next to each other
 plot(tomato$total.area~tomato$Treatement)
-#plot(total.area~Treatement,data=tomato) #this is the same
-plot(tomato$total.area~tomato$Infection)
-plot(tomato$total.area~tomato$Infection)
+plot(total.area~Treatement, data=tomato) #this is the same but the XY labels change
+plot(total.area~Infection, data=tomato)
+plot(chlorotic.area~Infection, data=tomato)
 ```
 
 What happens with an interaction?
@@ -94,8 +101,8 @@ plot(total.area~chlorotic.area, data=tomato)
 You can apply transformation in your plot formula:
 
 ```{r log}
-plot(log(tomato$total.area)~tomato$Infection)
-plot(I(tomato$total.area/100000)~tomato$Infection)
+plot(log(total.area)~Infection,data=tomato)
+plot(I(total.area/100000)~Infection,data=tomato)
 ```
 
 We can create new variables that combine Treatement and Infection as well as the ratio between both areas, then use it for plotting:
@@ -104,7 +111,7 @@ We can create new variables that combine Treatement and Infection as well as the
 tomato$combo<-as.factor(paste(tomato$Treatement,tomato$Infection,sep=""))
 tomato$rate<-tomato$chlorotic.area/tomato$total.area
 tomato$combo<-factor(tomato$combo,levels=levels(tomato$combo)[c(2,1,4,3)]) #here we reorder the levels
-plot(tomato$rate~tomato$combo)
+plot(rate~combo,data=tomato)
 ```
 
 ## Challenge 3
