@@ -183,6 +183,7 @@ Then,
 1. combine these into a data frame and give them a sensible class 
 2. Multiply the CFU column by 1000 and save it as a new column
 3. using `str()`, check the class of your data frame columns
+4. Save your dataframe as an RDS file
 
 <details>
 <summary>**Click to see an example solution!**</summary>
@@ -203,6 +204,7 @@ my_first_data_frame <- data.frame(
 my_first_data_frame$CFU_multiplied <- my_first_data_frame$CFU*100
 
 str(my_first_data_frame)
+saveRDS(my_first_data_frame, "my_first_data_frame.RDS")
 
 ```
 </details>
