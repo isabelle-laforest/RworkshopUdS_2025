@@ -252,32 +252,11 @@ min(some_numbers) # find the minimum
 Operations can also be done between columns of a data frame. In the following, we multiply two columns together and add the resulting vector as a new column on the same dataset using the `<-` (assignment) operator.
 
 ```{r}
-assay$new_column <- assay$CFU * assay$OD # with $ sign
-assay['new_column'] <- assay$CFU * assay$OD # equivalent!
+assay$CFU_times_OD <- assay$CFU * assay$OD # with $ sign
+assay['CFU_times_OD'] <- assay$CFU * assay$OD # equivalent!
+assay['log_CFU'] <- log10(assay$CFU)
 summary(assay) 
 ```
-
-### Loops
-
-Loops are very useful, as they help us do similar operations multiple times while writing them only once. Let's say there you would like to multiply three columns of your dataframe by 1000. If your data was a numeric matrix, you could simply multiply the matrix object by 1000, e.g. `new_matrix = old_matrix*1000`. But we usually work with data frames, because our data contains various types of variables. Thus, columns may be characters or factors, which obviously cannot be multiplied. So we want to selectively multiply certain columns :
-
-```{r}
-my_data_frame <- assay # we just copy the df not to overwrite it
-my_data_frame$CFU <- my_data_frame$CFU*1000
-my_data_frame$OD <- my_data_frame$OD*1000
-my_data_frame$new_column <- my_data_frame$new_column*1000
-```
-
-and so on for every variable. Using a loop, it would look like this:
-
-```{r}
-for (i in c('OD', 'CFU', 'new_column') ) { # define what to iterate on
-  my_data_frame[[i]] <- my_data_frame[[i]]*1000
-}
-summary(my_data_frame)
-```
-
-It may not be useful for such a simple operation on only a few columns, but you can imagine how much time would be saved if the operations you do are more complex and need to be applied to multiple columns. Moreover, if you realise you need to multiply by 100 instead, you only have to change in one place, reducing the risk of syntax error.
 
 ## Challenge N˚2
 
@@ -335,7 +314,8 @@ tomato <- read_xlsx('data/Rocio_tomato_modified.xlsx')
 #tomato<-read.csv("data/Rocio_tomato_modified.csv")
 ```
 
-Let's look at this new dataset:
+Let's look at this dataset. It's real data from workshop participant Maria Rocio Gonzalez-Lamothe, where tomato plants have been infected (or not) with a pathogen and either received a treatement or a no treatment. We want to look at the leaf area affected by chlorosis and compare it between the infected and control groups.
+
 
 ```{r}
 head(tomato)
@@ -344,8 +324,8 @@ summary(tomato)
 
 ## Formatting
 
-Next, you will want to make sure that your variables are formatted adequately.
-Here, we have variables that are numeric (allowing for mathematical operations) and some that are factors (with levels).
+Next, you will want to make sure that your variables are formatted adequately.  
+Here, we have variables that are numeric (allowing for mathematical operations) and some that are factors (with levels).  
 We will transform some in factors and take a look at the summary() to confirm the successful transformation.
 
 ```{r transform}
@@ -373,6 +353,8 @@ Histograms are a fundamental tool in R for exploratory data analysis (EDA). They
 **Check Assumptions:** Assess if data meets statistical assumptions (e.g., normality for t-tests).
 **Compare Groups:** Overlay histograms to compare different subsets (e.g., treatment vs. control).
 
+### Histograms
+
 In R, creating a histogram is simple (e.g., hist(data)), making it an essential first step in understanding your data before diving into analysis.
 
 ```{r hist}
@@ -385,7 +367,9 @@ hist(tomato$total.area)
 hist(tomato$chlorotic.area)
 ```
 
-Scatterplot and boxplots are also very common graphs to be performed to explore the data. Here are a few examples:
+### Boxplots
+
+Scatterplot and boxplots are also very common to look at the distribution of your variables. Here are a few examples:
 
 ```{r plot}
 par(mfrow=c(2,2))# Create a 2 x 2 plotting matrix
@@ -402,11 +386,14 @@ What happens with an interaction?
 plot(total.area~Infection*Treatement, data=tomato)
 ```
 
-Here is a scatterplot:
+### Scatterplots 
+They allow you to visualise all the data points
 
 ```{r scatterplot}
 plot(total.area~chlorotic.area, data=tomato)
 ```
+
+### Plot transformed data directly
 
 You can apply transformation in your plot formula:
 
@@ -425,37 +412,47 @@ tomato$combo<-factor(tomato$combo,levels=levels(tomato$combo)[c(2,1,4,3)]) #here
 plot(rate~combo,data=tomato)
 ```
 
-## Challenge 3
+## Challenge N˚3
 
 Create a new dataset from tomato but excluding rep #5.
 
 Plot side-by-side the histogram of total.area with and without rep 5, as well as chlorotic.area with and without rep 5.
 
-## Bonus
-
+** BONUS **
 Create a dataset for each rep and plot the ratio between chlorotic.area/total.area for the for combined levels (combo).
 
-## Hands on session 1
+## Loops
 
-#### Create a new script for your project
+Loops are very useful, as they help us do similar operations multiple times while writing them only once. Let's say you want to compute the mean chlorotic area for treated and untreated plants.
 
-#### Import your data
+```{r}
+mean_Mock <- mean(tomato$chlorotic.area[tomato$Treatement == "mock"])
 
-#### Explore it
+mean_Treat <- mean(tomato$chlorotic.area[tomato$Treatement == "treated"])
 
-#### Format your data (categorical data as factors)
+cat("Mean chlorotic area (mock):", mean_Mock, "square mm" )
+cat("Mean chlorotic area (treated):", mean_Treat , "square mm")
+```
 
-#### Subset, compute group means and sd
+and so on for every variable. Using a loop, it would look like this:
 
-#### Make a histogram of a numeric variable
+```{r}
+for (i in c('mock', 'treated')) {
+  mean_value <- mean(tomato$chlorotic.area[tomato$Treatement == i])
+  cat("Mean chlorotic area (",i,"):", mean_Mock, "square mm\n")
+} # the \n character forces a line break
+```
 
-#### Make a dot plot with two variables (at least one numeric)
+It may not seems like much of a gain, but imagine if you had multiple levels to compute? Without a loop, you need 2 extra lines of code for every level. In a loop, you only need to add conditions to your vector.
 
-#### Ask us how to do what you want to do !
+## Super Challenge N˚4
 
-# Plots with ggplot (Tuesday)
+1. Compute the % chlorosis by total area for each sample as a new column;
+2. Using a loop, compute the mean % chlorosis for every unique combination of `Treatment`, `Infection` and `rep` and print it to the console using `cat()` ;
+3. Rerun your loop, but this time instead of printing to the console, save the values in a matrix. Hint: you can create an empty matrix with the appropriate dimensions and fill it using the loop and row/columns indices.
 
-We work with a real dataset where tomato plants have been infected (or not) with a pathogen. We want to look at the proportion of leaf area affected by chlorosis and compare it between the infected and control groups.
+
+# Plots with ggplot2
 
 ## Objectives
 
@@ -463,19 +460,16 @@ We work with a real dataset where tomato plants have been infected (or not) with
 
 2. Plot the proportion of plant leaf covered by chlorosis with mean and standard devitions by replicate, in a way that will allow us to compare the two groups (infected and not infected) across the two treatments (mock of treated).
 
-
-Two packages are required here, make sure you have installed them:
-
-```{r}
-# install.packages('tidyverse') # super-package that includes ggplot
-# install.packages('openxlsx') # to parse excel files
+```
+install.packages('tidyverse') # super-package that includes ggplot
+install.packages('kableExtra')
 ```
 
 ## The tidyverse syntax
 
 ```{r load-packages, include=FALSE}
 library(pacman)
-p_load(tidyverse, magrittr, openxlsx, kableExtra)
+p_load(tidyverse, openxlsx, kableExtra)
 ```
 
 ```{r}
