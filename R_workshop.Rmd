@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This tutorial was created for a 3-day free R introduction workshop organized by the [Laforest-Lapointe Lab](https://www.laforestlab.com/) at Université de Sherbrooke on May 12th-14th.
 
-# Day 1 - Session 1
+# Day 1 AM - Session 1
 
 R is an object-oriented programming language. Essentially, this means that data, values, inputs and outputs are saved as "objects" whose names are defined by the user. Objects can then be used to perform calculations, data manipulation, or visualisations.
 
@@ -194,6 +194,8 @@ saveRDS(df1, "df1.RDS")
 df1_new <- readRDS("df1.RDS")
 ```
 
+This is very useful when you need to share R objects as is with collaborators. It's also useful when you work with large datasets and want to save time. For example, you could have a first script dedicated to producing a certain output, which you save as an RDS object. Then, in a second script, this data can be taken as input and be worked on. This way, when working on your second script, you don't need to regenerate this large input dataset every time you test the code on that second script.
+
 ## Challenge N˚1  
 
 Create the following objects with 4 made-up values each:  
@@ -287,9 +289,27 @@ assay['log_CFU'] <- log10(assay$CFU)
 summary(assay) 
 ```
 
+## Loading packages
+
+As you can see, Base R has hundreds of functions available. But sometimes, we need more. That's when packages come in handy. Packages are collections of functions developed by people around the world for various purposes. These are made available freely to the public, and R has a function to install these packages. For example, you could run `install.packages('tidyverse')`, which we'll use tomorrow. Now, whenever you use R, you can gain access to hundreds of new functions by adding `library(tidyverse)` at the beginning of your script.
+
+Often, you'll need multiple packages for your project. Instead of writing a series of `library()` commands at the top of your script, you can install the `pacman` package and use its very useful function, `p_load()`. This command installs AND loads any package, and you can load as many packages as you want with a single command.
+
+Remember: every time you open RStudio, you'll need to load the packages you need. A good practice is to put the package loading commands at the top of all your scripts.
+
 ## Challenge N˚2
 
-<..........>
+1. Install the pacman package 
+2. Download the dataset `Rocio_tomato_modified.xlsx` available on the [Workshop repository](https://github.com/isabelle-laforest/RworkshopUdS_2025/tree/main/data) or on the Teams documents
+3. Put this file in your working directory
+4. Create a new script and save it as **Challenge2.R**
+5. In this script :
+    1. load the pacman package and use `p_load()` to install and load the package `readxl`, which we'll need for the next tutorial
+    2. Use `read_xlsx()` to read the file into an object
+    3. Print a summary of that object
+    4. Compute the mean of the `chlorotic.area` column and print it
+    5. Run your script top-to-bottom to make sure it works entirely
+    6. Add comments your code, briefly explaining what it does
 
 ## Other useful functions
 
@@ -328,7 +348,9 @@ a_vector_of_values
 sort(a_vector_of_values)
 ```
 
-# Day 1 - Session 2
+
+
+# Day 1 AM - Session 2
 
 **Objectives:**
 
@@ -340,19 +362,17 @@ Let's look at a new, imperfect dataset, which is most likely what you will be de
 
 ## Reading from an Excel file
 
-Earlier we used a dataset that was saved in a text file with columns delimited by tabulations (using the `read.table()` function). However, many of you save your data in excel files. We can install a package to get a new function specialised in reading excel files by running `install.packages('readxl')`. Once you've done this, add the following line at the top of your script:
-
-```{r}
-library(readxl) # you need execute this every time you open R
-```
+Earlier we used a dataset that was saved in a text file with columns delimited by tabulations (using the `read.table()` function). However, many of you save your data in excel files. 
 
 It is important to create objects with explicit and short names, that are not already built-in functions in R. Ex: do not create a data named `data` or `summary` or `plot`. 
 
-Let's load a new dataset to work with (found on the [Workshop repository](https://github.com/isabelle-laforest/RworkshopUdS_2025/tree/main/data) )
+Let's load a new dataset to work with ! 
 
 ```{r import}
+library(pacman)
+p_load(readxl)
 #tomato_data_2025_ILL_test_repeat<-read.csv("Rocio_tomato_modified.csv")
-tomato <- read_xlsx('data/Rocio_tomato_modified.xlsx')
+tomato <- read_xlsx('data/Rocio_tomato_modified.xlsx', sheet = 2)
 #tomato<-read.csv("data/Rocio_tomato_modified.csv")
 ```
 
@@ -486,14 +506,14 @@ for (i in c('mock', 'treated')) {
 
 It may not seems like much of a gain, but imagine if you had multiple levels to compute? Without a loop, you need 2 extra lines of code for every level. In a loop, you only need to add conditions to your vector.
 
-## Super Challenge N˚4
+## Challenge N˚4
 
 1. Compute the % chlorosis by total area for each sample as a new column;
 2. Using a loop, compute the mean % chlorosis for every unique combination of `Treatment`, `Infection` and `rep` and print it to the console using `cat()` ;
 3. Rerun your loop, but this time instead of printing to the console, save the values in a matrix. Hint: you can create an empty matrix with the appropriate dimensions and fill it using the loop and row/columns indices.
 
 
-# Day 2 - Session 1
+# Day 2 AM - Session 3
 
 ## Objectives
 
@@ -585,7 +605,7 @@ tomato_summary %>%
 I have intentionally introduced a typographic error in the following dataset; factors will help us spot them quickly.To get there, let's convert characters as factors using `mutate()` :
 ```{r}
 
-tomato_mdf <- read.xlsx('data/Rocio_tomato_modified.xlsx') %>% 
+tomato_mdf <- read.xlsx('data/Rocio_tomato_modified.xlsx', sheet = 2) %>% 
   mutate(Treatement = as.factor(Treatement),
          Infection = as.factor(Infection),
          rep = as.factor(rep)) # even if it's a number, it represents categorical information
@@ -633,10 +653,9 @@ Here I introduced the assignment pipe operator `%<>%`. It is equivalent to doing
 
 ### Pivoting tables
 
-### 
 
-```{r }
+# Day 2 PM - Session 4
 
-```
+# Day 3 AM - Session 5
 
-# Stats in R (Wednesday)
+# Day 3 PM - Session 6
