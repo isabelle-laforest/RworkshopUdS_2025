@@ -7,8 +7,9 @@ output:
       collapsed: true
     toc_depth: 3
     number_sections: true
-    theme: cosmo
+    theme: lumen
     highlight: tango
+    
 author: "Isabelle Laforest-Lapointe, Amy Heim, Sophie Boutin, Jonathan Rondeau-Leclaire"
 ---
 
@@ -18,11 +19,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This tutorial was created for a 3-day free R introduction workshop organized by the [Laforest-Lapointe Lab](https://www.laforestlab.com/) at Université de Sherbrooke on May 12th-14th.
 
-# Day 1
+# Day 1 - Session 1
 
 R is an object-oriented programming language. Essentially, this means that data, values, inputs and outputs are saved as "objects" whose names are defined by the user. Objects can then be used to perform calculations, data manipulation, or visualisations.
 
-## Objectives
+**Objectives:**
 
 1. Familiarise ourseves with RStudio
 2. Learn the syntax of the R language
@@ -128,7 +129,7 @@ The following can only be used for numeric values:
 ```
 
 ### Logical operators
-  
+
 - `&` and  
 - `|` or
 
@@ -256,18 +257,21 @@ colnames(assay) # column names (our variable names!)
 length(assay$OD) # check the length of a vector (a column fetched using $ is a vector)
 ```
 
-### Basic operations
+### Basic functions
 
 R can be used to operate on values in pretty much any way imaginable, from very simple things like calculating the mean to more complex things like removing certain characters from every values in a data frame variable.
 
 Most mathematical operations are available as functions :
 
 ```{r math ops}
-some_numbers <- head(assay$CFU)
+some_numbers <- head(assay$CFU, n = 10) # n is a parameter of the head() function
 some_numbers
-sum(some_numbers) # Sum the values of a numeric vector
 sqrt(some_numbers) # square root of each value
-sum(some_numbers)/length(some_numbers) # compute the mean "manually"
+a_sum_value <- sum(some_numbers) # Sum the values of a numeric vector
+a_length_value <- length(some_numbers) # Count the number of elements in that vector
+a_sum_value; a_length_value  # print them to the console
+values_mean <- a_sum_value/a_length_value # compute the mean "manually"
+values_mean
 mean(some_numbers) # compute the mean using a specific function
 median(some_numbers)
 sd(some_numbers) # compute the standard deviation
@@ -285,27 +289,38 @@ summary(assay)
 
 ## Challenge N˚2
 
+<..........>
 
+## Other useful functions
 
-## R as a calculator
+### Use R as a calculator
 
-You can also straight up use R as you would a calculator. Let's find the area of a single slice of a 14" pizza cut in 8, then format the result to be more "readable" :
+As briefly shown at the beginning, you can also straight up use R as you would a calculator. It's useful for complex arithmetic because you can write your whole equation and then execute it. For example, let's find the area of a single slice of a 14" pizza cut in 8, then format the result to be more "readable" :
 
 ```{r}
-slice_area <- (pi*(14/2)^2)/4
+diameter <- 14
+slices <- 8
+slice_area <- (pi*(diameter/2)^2)/slices
 slice_area_formatted <- round(slice_area, 2)
-paste('The slice of a 14 inches pizza cut in 8 will have a surface of', slice_area_formatted, "square inches.")
+
+message('The slice of a 14 inches pizza cut in 8 will have a surface of ', slice_area_formatted, " square inches.")
 ```
 
 Notice that we've created many objects to do this. We could just as well have done a single-liner that only prints the result to our console:
 
 ```{r}
-paste('The slice of a 14 inches pizza cut in 8 will have a surface of', round((pi*(14/2)^2)/4, 2), "square inches.")
+paste(
+  'The slice of a 14 inches pizza cut in 8 will have a surface of',
+  round((pi*(14/2)^2)/8, 2), 
+  "square inches."
+) # notice that I can split my command on multiple lines without affecting it!
 ```
 
 but it's up to you to decide how explicit you want your code to be. More explicit code is more readable, but requires more steps to be written out. It's all about balance.
 
-You can also use R as a random number generator. The simplest way is using the uniform distribution, `runif()`, which draws `n` observations between specified values, and all values have an equal chance of being drawn.
+### Random number generation
+
+You can also use R as a random number generator. The simplest way is using the uniform distribution, `runif()`, which draws `n` observations between the specified parameters `min` and `max`.
 
 ```{r}
 a_vector_of_values <- runif(n = 10, min = 0, max = 100)
@@ -313,19 +328,19 @@ a_vector_of_values
 sort(a_vector_of_values)
 ```
 
-You can draw from the normal distribution too, by specifying the mean and sd :
+# Day 1 - Session 2
 
-```{r}
-a_normal_draw <- rnorm(n = 100, mean = 0, sd = 1)
-head(a_normal_draw)
-hist(a_normal_draw)
-```
+**Objectives:**
 
-# Do's and don'ts
+1. Find errors in data and correct them
+2. Learn quick data visualisation techniques 
+3. Learn about loops
 
-## Importing new data
+Let's look at a new, imperfect dataset, which is most likely what you will be dealing with. We thank workshop participant Maria Rocio Gonzalez-Lamothe for sharing it with us. This data comes from an experiment with tomato plants, which have been infected (or not) with a pathogen and have either received (or not) a treatement. The data collected the total area of the plant leaf, and the total area affected by chlorosis.
 
-Often we save our data in excel files. We can install a package to get a new function specialised in reading excel files by running `install.packages('readxl')`. Once you've done this, add the following line at the top of your script:
+## Reading from an Excel file
+
+Earlier we used a dataset that was saved in a text file with columns delimited by tabulations (using the `read.table()` function). However, many of you save your data in excel files. We can install a package to get a new function specialised in reading excel files by running `install.packages('readxl')`. Once you've done this, add the following line at the top of your script:
 
 ```{r}
 library(readxl) # you need execute this every time you open R
@@ -341,8 +356,7 @@ tomato <- read_xlsx('data/Rocio_tomato_modified.xlsx')
 #tomato<-read.csv("data/Rocio_tomato_modified.csv")
 ```
 
-Let's look at this dataset. It's real data from workshop participant Maria Rocio Gonzalez-Lamothe, where tomato plants have been infected (or not) with a pathogen and either received a treatement or a no treatment. We want to look at the leaf area affected by chlorosis and compare it between the infected and control groups.
-
+Let's look at this dataset. 
 
 ```{r}
 head(tomato)
@@ -351,9 +365,7 @@ summary(tomato)
 
 ## Formatting
 
-Next, you will want to make sure that your variables are formatted adequately.  
-Here, we have variables that are numeric (allowing for mathematical operations) and some that are factors (with levels).  
-We will transform some in factors and take a look at the summary() to confirm the successful transformation.
+Next, we want to make sure that variables are formatted adequately. Here, we have variables that are numeric (allowing for mathematical operations) and some that are factors (with levels). We will transform some in factors and take a look at the `summary()` to confirm the successful transformation.
 
 ```{r transform}
 tomato$rep<-as.factor(tomato$rep)
@@ -361,8 +373,7 @@ tomato$Treatement<-as.factor(tomato$Treatement)
 tomato$Infection<-as.factor(tomato$Infection)
 summary(tomato)
 ```
-We can observe quickly that a typo is now present in our data.
-We could either correct it in the raw data file and reimport a new object, or correct it in R using the which() function and dimensionality operators.
+We can observe quickly that a typo is now present in our data. We could either correct it in the raw data file and reimport a new object, or, to increase reproducibility, correct it in R using the `which()` function and dimensionality operators.
 
 ```{r error}
 which(tomato$Infection=="pathogn") #find the position of the error in the variable
@@ -376,8 +387,11 @@ summary(tomato) #check the summary again
 Histograms are a fundamental tool in R for exploratory data analysis (EDA). They help you:
 
 **Visualize Distributions:** Quickly see the shape of your data (e.g., normal, skewed, bimodal).
+
 **Spot Outliers & Gaps:** Identify unusual values or missing ranges in your dataset.
+
 **Check Assumptions:** Assess if data meets statistical assumptions (e.g., normality for t-tests).
+
 **Compare Groups:** Overlay histograms to compare different subsets (e.g., treatment vs. control).
 
 ### Histograms
@@ -420,7 +434,7 @@ They allow you to visualise all the data points
 plot(total.area~chlorotic.area, data=tomato)
 ```
 
-### Plot transformed data directly
+### Transform data directly in plots
 
 You can apply transformation in your plot formula:
 
@@ -445,7 +459,7 @@ Create a new dataset from tomato but excluding rep #5.
 
 Plot side-by-side the histogram of total.area with and without rep 5, as well as chlorotic.area with and without rep 5.
 
-** BONUS **
+**BONUS**
 Create a dataset for each rep and plot the ratio between chlorotic.area/total.area for the for combined levels (combo).
 
 ## Loops
@@ -479,13 +493,13 @@ It may not seems like much of a gain, but imagine if you had multiple levels to 
 3. Rerun your loop, but this time instead of printing to the console, save the values in a matrix. Hint: you can create an empty matrix with the appropriate dimensions and fill it using the loop and row/columns indices.
 
 
-# Day 2
+# Day 2 - Session 1
 
 ## Objectives
 
 1. Learn the tidyverse syntax as an intutive way to prepare our datasets
 
-2. Plot the proportion of plant leaf covered by chlorosis with mean and standard devitions by replicate, in a way that will allow us to compare the two groups (infected and not infected) across the two treatments (mock of treated).
+2. Plot the proportion of plant leaf covered by chlorosis with mean and standard deviations by replicate, in a way that will allow us to compare the two groups (infected and not infected) across the two treatments (mock of treated).
 
 ```
 install.packages('tidyverse') # super-package that includes ggplot
@@ -566,7 +580,6 @@ tomato_summary %>%
   kable_styling("striped")
 ```
 
-
 ### Modifying variables
 
 I have intentionally introduced a typographic error in the following dataset; factors will help us spot them quickly.To get there, let's convert characters as factors using `mutate()` :
@@ -595,8 +608,8 @@ tomato_mdf <- tomato_mdf %>%
       case_when(
         Infection == "pathogn" ~ "pathogen",
         TRUE ~ Infection
-        ))
-    )
+      ))
+  )
 
 summary(tomato_mdf)
 dim(tomato_mdf)
