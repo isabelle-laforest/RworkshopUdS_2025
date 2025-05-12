@@ -299,7 +299,7 @@ Remember: every time you open RStudio, you'll need to load the packages you need
 
 ## Challenge N˚2
 
-1. Install the pacman package 
+1. Install the readxl package 
 2. Download the dataset `Rocio_tomato_modified.xlsx` available on the [Workshop repository](https://github.com/isabelle-laforest/RworkshopUdS_2025/tree/main/data) or on the Teams documents
 3. Put this file in your working directory
 4. Create a new script and save it as **Challenge2.R**
@@ -526,7 +526,11 @@ install.packages('kableExtra')
 
 ## The tidyverse syntax
 
-Yesterday, we covered functions that are included "by default" in R, what we call the Base R language. Over time, a large library of functions was developed, called `tidyverse.` These functions let you modify your data in a very intuitive manner. We'll start over with the tomato dataset, get it ready for plotting. 
+When working with large datasets with multiple variables, R can become cumbersome. Imagine having to change 20 character variables to factors, or modifying a recurring typo in a data frame with 2,000 rows... fortunately, it happened to enough people for the community to create new functions to help you write concise, powerful scripts. 
+
+Yesterday, we covered functions that are included "by default" in R, what we call the Base R language. Over time, a large library of functions was developed, called `tidyverse.` These functions let you modify your data in a very intuitive manner. 
+
+Let's learn the tidyverse syntax!
 
 ```{r load-packages, include=FALSE}
 library(pacman)
@@ -534,16 +538,15 @@ p_load(tidyverse, openxlsx, kableExtra)
 ```
 
 ```{r}
-tomato <- read.xlsx('data/Rocio_tomato.xlsx')
-str(tomato)
+kangoroos <- read.xlsx('data/Marco_kangoroos.xlsx')
+glimpse(kangoroos)
 ```
 
 We introduce a modern syntax from the `tidyverse` superpackage, which uses the pipe operator `%>%`. You can print it by using the `shift+cmd+m` keyboard combination (or `shift+ctrl+m` on Windows).
 
-
 ### Understanding pipes %>% 
 
-To show its usefuleness in making codes much easier to read, consider the following challenge: **Compute the mean proportion of chlorotic area of infected plants that were NOT treated, and format it to print as a percentage with 2 decimals.**.
+To show its usefulness in making codes much easier to read, consider the following challenge: **Compute the mean proportion of chlorotic area of infected plants that were NOT treated, and format it to print as a percentage with 2 decimals.**.
 
 A traditional base R code could look like this: 
 
