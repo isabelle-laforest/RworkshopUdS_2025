@@ -626,7 +626,8 @@ tomato_mdf <- tomato_mdf %>%
       case_when(
         Infection == "pathogn" ~ "pathogen",
         TRUE ~ Infection
-      ))
+      )
+    )
   )
 
 summary(tomato_mdf)
@@ -787,15 +788,6 @@ tomato_mdf %>%
 7. Save your plot using the `ggsave()` function as a 1400 x 1200 pixels file in .png format
 
 
-```{r}
-ggplot(tomato_mdf,
-       aes(x = Treatment, y = prop_area, fill = Treatment)) +
-  geom_violin() +
-  geom_jitter(aes(shape = rep), width = 0.2, colour = 'grey', size = 3) +
-  facet_wrap(~Infection) +
-  scale_fill_manual(values = c('darkred', 'midnightblue')) +
-  theme_minimal()
-```
 
 
 

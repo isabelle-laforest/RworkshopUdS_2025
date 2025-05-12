@@ -4,9 +4,7 @@ output: html_document
 date: "2025-05-10"
 ---
 
-
-<details>
-<summary>**Click to see an example solution!**</summary>
+Challenge 1
 
 ```{r, echo=TRUE}
 # Create 
@@ -27,4 +25,15 @@ str(my_first_data_frame)
 saveRDS(my_first_data_frame, "my_first_data_frame.RDS")
 ```
 
-</details>
+
+Challenge 5
+
+```{r}
+ggplot(tomato_mdf,
+       aes(x = Treatment, y = prop_area, fill = Treatment)) +
+  geom_violin() +
+  geom_jitter(aes(shape = rep), width = 0.2, colour = 'grey', size = 3) +
+  facet_wrap(~Infection) +
+  scale_fill_manual(values = c('darkred', 'midnightblue')) +
+  theme_minimal()
+```
