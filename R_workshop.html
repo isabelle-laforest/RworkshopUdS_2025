@@ -2063,13 +2063,13 @@ which can be annoying to write out. Instead, it’s useful to set your
 working directory once at the beginning of your script, and then use
 relative paths to find your file. To do this, start by creating a folder
 in your computer, from where to work:</p>
-<pre><code>dir.create(&#39;~/Rworkshop2025&#39;) # Note that paths are always quoted  
-setwd(&#39;~/RWorkshop2025&#39;)
-dir.create(&#39;Output&#39;)</code></pre>
+<pre><code>setwd(&#39;~/RWorkshop2025&#39;)
+dir.create(&#39;output&#39;)
+dir.create(&#39;data&#39;)</code></pre>
 <p>The <code>~</code> is a shortcut to your Home folder. You can always
 create your folders by hand, but it helps to have the path in your
 script. Now, if we save an object we previously created,</p>
-<pre><code>saveRDS(my_first_data_frame, &quot;Output/my_first_data_frame.RDS&quot;)</code></pre>
+<pre><code>saveRDS(my_first_data_frame, &quot;output/my_first_data_frame.RDS&quot;)</code></pre>
 <p>It will be saved in that directory without needing to specify the
 absolute path.</p>
 </div>
@@ -2252,11 +2252,11 @@ using the uniform distribution, <code>runif()</code>, which draws
 <code>min</code> and <code>max</code>.</p>
 <div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" tabindex="-1"></a>a_vector_of_values <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="at">n =</span> <span class="dv">10</span>, <span class="at">min =</span> <span class="dv">0</span>, <span class="at">max =</span> <span class="dv">100</span>)</span>
 <span id="cb71-2"><a href="#cb71-2" tabindex="-1"></a>a_vector_of_values</span></code></pre></div>
-<pre><code>##  [1] 81.295456 90.760562 65.140138 71.212328 25.250885 68.641974  8.918149
-##  [8]  6.080841 20.560963 32.543661</code></pre>
+<pre><code>##  [1] 86.503546 27.517942 56.101120 66.363022 19.333433 81.702190  4.040587
+##  [8]  6.313500 66.390642 45.524298</code></pre>
 <div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" tabindex="-1"></a><span class="fu">sort</span>(a_vector_of_values)</span></code></pre></div>
-<pre><code>##  [1]  6.080841  8.918149 20.560963 25.250885 32.543661 65.140138 68.641974
-##  [8] 71.212328 81.295456 90.760562</code></pre>
+<pre><code>##  [1]  4.040587  6.313500 19.333433 27.517942 45.524298 56.101120 66.363022
+##  [8] 66.390642 81.702190 86.503546</code></pre>
 </div>
 </div>
 </div>

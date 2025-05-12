@@ -7,9 +7,9 @@ output:
       collapsed: true
     toc_depth: 3
     number_sections: true
-    theme: lumen
+    theme: cosmo
     highlight: tango
-    
+
 author: "Isabelle Laforest-Lapointe, Amy Heim, Sophie Boutin, Jonathan Rondeau-Leclaire"
 ---
 
@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This tutorial was created for a 3-day free R introduction workshop organized by the [Laforest-Lapointe Lab](https://www.laforestlab.com/) at Université de Sherbrooke on May 12th-14th.
 
-# Day 1 AM - Session 1
+# Session 1 - Monday AM
 
 R is an object-oriented programming language. Essentially, this means that data, values, inputs and outputs are saved as "objects" whose names are defined by the user. Objects can then be used to perform calculations, data manipulation, or visualisations.
 
@@ -223,14 +223,14 @@ It's good to have a working directory specifically dedicated to your project, wh
 R can look anywhere in our computer for files. However, to load a file, you need to know its full path, e.g. `'/Users/jorondo/Repos/RworkshopUdS_2025/data.txt'` which can be annoying to write out. Instead, it's useful to set your working directory once at the beginning of your script, and then use relative paths to find your file. To do this, start by creating a folder in your computer, from where to work:
 
 ```
-dir.create('~/Rworkshop2025') # Note that paths are always quoted  
 setwd('~/RWorkshop2025')
-dir.create('Output')
+dir.create('output')
+dir.create('data')
 ```
 The `~` is a shortcut to your Home folder. You can always create your folders by hand, but it helps to have the path in your script. Now, if we save an object we previously created,
 
 ```
-saveRDS(my_first_data_frame, "Output/my_first_data_frame.RDS")
+saveRDS(my_first_data_frame, "output/my_first_data_frame.RDS")
 ```
 
 It will be saved in that directory without needing to specify the absolute path.
@@ -348,9 +348,7 @@ a_vector_of_values
 sort(a_vector_of_values)
 ```
 
-
-
-# Day 1 AM - Session 2
+# Session 2 - Monday PM
 
 **Objectives:**
 
@@ -513,7 +511,7 @@ It may not seems like much of a gain, but imagine if you had multiple levels to 
 3. Rerun your loop, but this time instead of printing to the console, save the values in a matrix. Hint: you can create an empty matrix with the appropriate dimensions and fill it using the loop and row/columns indices.
 
 
-# Day 2 AM - Session 3
+# Session 3 - Tuesday AM
 
 ## Objectives
 
@@ -654,8 +652,8 @@ Here I introduced the assignment pipe operator `%<>%`. It is equivalent to doing
 ### Pivoting tables
 
 
-# Day 2 PM - Session 4
+# Session 4 - Tuesday PM
 
-# Day 3 AM - Session 5
+# Session 5 - Wednesday AM
 
-# Day 3 PM - Session 6
+# Session 6 - Wednesday PM
