@@ -640,8 +640,6 @@ kangoroos
 
 Using the `summarise()` command, find the mean Leg length and body mass for each sex at every age.
 
-
-
 ## Plotting using ggplot
 
 In this intro to GGplot2 we will look at mapping, layers, and scales. In `ggplot()`, you map your variables to what are called aesthetics and you add on layers to generate a plot that uses those mappings. You can then add in scales to further manipulate your plot. 
