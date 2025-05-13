@@ -898,6 +898,15 @@ Combine them into a 1x3 horizontal layout
 Add a shared title "Diamond Analysis"
 Label subplots as A, B, C
 
+## Super challenge !
+
+Using Marco's dataset :
+
+1. Correct the Method variable so that `pole` is replaced by `Pole` (because we find both!)
+2. Dynamically create a vector containing the top 3 most common capture methods
+3. Create a density ridge plot showing the distribution of masses for each age, in a way that allows us to distinguish each method and compare both sexes.
+
+
 
 # Session 5 - Wednesday AM
 
