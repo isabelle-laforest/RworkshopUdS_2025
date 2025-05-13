@@ -979,6 +979,7 @@ Using the boxplot figures that we created from the tomato dataset, combine three
 Combine them into a 1x3 horizontal layout
 Add a shared title "Walk through a tomato plotting contest"
 Label subplots as A, B, C
+
 ## Super challenge !
 
 Using Marco's dataset :
