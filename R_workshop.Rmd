@@ -780,12 +780,12 @@ That plot does not look good, let's change the order of the x axis using `scale_
 
 ## Challenge N˚6
 
-. Make a violin plot of the proportion of Mass for each sex state using `geom_violin()`
+1. Make a violin plot of the proportion of Mass for each sex state using `geom_violin()`
 2. Add the points on top of the violins
 3. Add labels
-3. Map the shape of the points to the `Year` variable (hint: you can reuse the `aes()` function inside any geom, here's a [reference](https://www.sthda.com/english/wiki/ggplot2-point-shapes))
-4. Facet this plot by Method
-5. Use the minimal theme
+3. Map the shape of the points to the `Method` variable 
+4. Facet this plot by Method and Sex (try `facet_grid()`)
+5. Change the theme (try em out!)
 6. Change the colours of the violins to "darkred" and "midnightblue" (hint: check the `scale_fill_manual()` function)
 7. Save your plot using the `ggsave()` function as a 1400 x 1200 pixels file in .png format
 
