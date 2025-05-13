@@ -299,7 +299,7 @@ Remember: every time you open RStudio, you'll need to load the packages you need
 
 ## Challenge N˚2
 
-1. Install the readxl package 
+1. Install the pacman package 
 2. Download the dataset `Rocio_tomato_modified.xlsx` available on the [Workshop repository](https://github.com/isabelle-laforest/RworkshopUdS_2025/tree/main/data) or on the Teams documents
 3. Put this file in your working directory
 4. Create a new script and save it as **Challenge2.R**
@@ -513,15 +513,15 @@ It may not seems like much of a gain, but imagine if you had multiple levels to 
 
 # Session 3 - Tuesday AM
 
-## Objectives
+**Objectives:**
 
-1. Learn the tidyverse syntax as an intutive way to prepare our datasets
+1. Learn the tidyverse syntax as an intuitive way to prepare our datasets.
 
-2. Plot the proportion of plant leaf covered by chlorosis with mean and standard deviations by replicate, in a way that will allow us to compare the two groups (infected and not infected) across the two treatments (mock of treated).
+2. learn to use the ggplot package!
 
 ```
 install.packages('tidyverse') # super-package that includes ggplot
-install.packages('kableExtra')
+
 ```
 
 ## The tidyverse syntax
@@ -534,17 +534,12 @@ Let's learn the tidyverse syntax!
 
 ```{r load-packages, include=FALSE}
 library(pacman)
-p_load(tidyverse, openxlsx, kableExtra)
+p_load(tidyverse)
 ```
-
-```{r}
-kangoroos <- read.xlsx('data/Marco_kangoroos.xlsx')
-glimpse(kangoroos)
-```
-
-We introduce a modern syntax from the `tidyverse` superpackage, which uses the pipe operator `%>%`. You can print it by using the `shift+cmd+m` keyboard combination (or `shift+ctrl+m` on Windows).
 
 ### Understanding pipes %>% 
+
+We introduce a modern syntax from the `tidyverse` superpackage, which uses the pipe operator `%>%`. You can print it by using the `shift+cmd+m` keyboard combination (or `shift+ctrl+m` on Windows).
 
 To show its usefulness in making codes much easier to read, consider the following challenge: **Compute the mean proportion of chlorotic area of infected plants that were NOT treated, and format it to print as a percentage with 2 decimals.**.
 
@@ -566,28 +561,52 @@ Now compare the same thing with the tidyverse syntax. We will use 3 new function
 
 -`pull()` which returns a dataset column as a vector
 
+We'll also introduce the pipe `%>%` operator, which is also available in base R as `|>` (choose your favourite!).
+
 ```{r}
-tomato %>% 
+library(tidyverse)
+
+tomato_subset <- tomato %>% 
   filter(Infection == 'pathogen' & Treatement == 'mock') %>% 
-  mutate(prop_area = 100*chlorotic.area/total.area) %>% 
+  mutate(prop_area = 100*chlorotic.area/total.area) 
+
+# Compute the mean
+tomato_subset %>% 
   pull(prop_area) %>% 
   mean() %>% 
   round(2) %>% 
   paste("Mean proportion:", ., "%")
 ```
-
-We can take advantage of that syntax to create more informative summaries of our data by using `group_by()`, a way to operate on subsets of our data without actually subsetting it; and passing the grouped dataframe to `summarise()`, which allows mathematical functions to be applied to every group. We then use `kable()` to format the output in a visually neat table.
+Let's switch to a new dataset with thousands of observations. We'll look at it briefly, then select a few columns of interest using `select()` and modify variable classes using `mutate()`
 
 ```{r}
-tomato_summary <- tomato %>% 
-  mutate(prop_area = 100*chlorotic.area/total.area) %>% 
-  group_by(Infection, Treatement) %>% 
-  summarise(mean_prop = mean(prop_area), 
-            sd_prop = sd(prop_area),
-            n_obs = n(),
-            .groups = 'drop')
+kangoroos <- read_xlsx('data/Marco_kangoroos.xlsx') 
 
-tomato_summary
+glimpse(kangoroos)
+
+kangoroos <- kangoroos %>% 
+  select(ID, Sex, Age, Mass, Leg, Date) %>% 
+  mutate(ID = as.factor(ID),
+         Sex = as.factor(Sex),
+         Age = as.numeric(Age)) 
+
+```
+These warnings are suspicious! We'll investigate them.
+
+We can take advantage of that syntax to create more informative summaries of our data by using `group_by()`, a way to operate on subsets of our data without actually subsetting it; and passing the grouped dataframe to `summarise()`, which allows mathematical functions to be applied to every group. 
+
+```{r}
+glimpse(kangoroos)
+
+kang_group_summary <- kangoroos %>% 
+  drop_na(Age, Sex) %>% 
+  group_by(Sex) %>% 
+  summarise(mean_age = mean(Age), 
+            sd_age = sd(Age),
+            n_obs = n()
+            )
+
+kang_group_summary
 ```
 
 Doing this using base R syntax would have required many intermediate objects, whereas here we get the end product with a single pipe that does all we need.
@@ -595,67 +614,27 @@ Doing this using base R syntax would have required many intermediate objects, wh
 We can also format this table if we wanted to export it. The kableExtra package is quite useful for this. We first round the values to the second decimal using `mutate()`, then change the column names and style the table.
 
 ```{r}
-tomato_summary %>% 
-  mutate(across(where(is.numeric), ~ round(., 2))) %>% 
-  kable(col.names = c("Infection", "Treatment", "Mean % leaf chlorosis", "SD % leaf chlorosis", "N")) %>% 
+library(kableExtra)
+kang_group_summary %>% 
+  mutate(across(where(is.numeric), ~ round(., 1))) %>% 
+  kable(col.names = c("Sex", "Mean Age", "SD Age", "N")) %>% 
   kable_styling("striped")
 ```
 
-### Modifying variables
-
-I have intentionally introduced a typographic error in the following dataset; factors will help us spot them quickly.To get there, let's convert characters as factors using `mutate()` :
-```{r}
-
-tomato_mdf <- read.xlsx('data/Rocio_tomato_modified.xlsx', sheet = 2) %>% 
-  mutate(Treatement = as.factor(Treatement),
-         Infection = as.factor(Infection),
-         rep = as.factor(rep)) # even if it's a number, it represents categorical information
-summary(tomato_mdf)
-```
-
-Consider the following things we might want to do as well:
-
-1.  The `Treatement` column name has an typo (an extra `e`) in it, it should be `Treatment`
-2.  There is a typo in one of the Infection values we want to correct
-3.  We want to compute the proportion of the total area that is chlorotic
-
-```{r}
-
-tomato_mdf <- tomato_mdf %>% 
-  rename(Treatment = Treatement) %>% 
-  mutate(
-    prop_area = 100*chlorotic.area/total.area,
-    Infection = as.factor(
-      case_when(
-        Infection == "pathogn" ~ "pathogen",
-        TRUE ~ Infection
-      )
-    )
-  )
-
-summary(tomato_mdf)
-dim(tomato_mdf)
-```
-
-### Basic string manipulation
-
-We could go further and modify text values in our dataset. For example, we might want to capitalise the first letter of `pathogen`. We could use a case_when(), but if we want to capitalise all values in our variables, it becomes cumbersome. Instead, we can use one of the many string manipulation verbs in the `tidyverse` package.
+Here's a fun operator, the assignment pipe `%<>%`. It acts as both a pipe and an assignment. It allows you to modify an object without creating a new object. You need to explicitly load the `magrittr` library even if tidyverse is loaded already.
 
 ```{r}
 library(magrittr)
-tomato_mdf %<>% 
-  mutate(
-    Infection = str_to_title(Infection),
-    Treatment = str_to_upper(Treatment)
-  )
-head(tomato_mdf)
+kangoroos %<>% 
+  mutate(Date = case_when(
+    str_detect(Date, 'Sept') ~ str_replace(Date, 'Sept', 'Sep'),
+               TRUE ~ Date),
+    Date = parse_date_time(Date, orders = c('%m%d%y')),
+    across(where(is.character), as.factor)
+ )
+
+kangoroos
 ```
-
-Here I introduced the assignment pipe operator `%<>%`. It is equivalent to doing `tomato_mdf <- tomato_mdf %>% ...`. To use that pipe, the `magrittr` package must be explicitly loaded (we did it earlier).
-
-### Pivoting tables
-
-# Session 4 - Tuesday PM
 
 ## Plotting using ggplot
 
@@ -667,7 +646,9 @@ We will map or select the data using `aes()`. Then we will select the type of gr
 
 The simplest plot which only uses a x **or** y aesthetic, to count frequencies.
 ```{r}
-ggplot(tomato_mdf, aes(x = chlorotic.area)) + 
+kangoroos %>% 
+  drop_na(Mass) %>% 
+  ggplot(aes(x = Mass)) + 
   geom_histogram()
 ```
 
@@ -676,7 +657,9 @@ ggplot(tomato_mdf, aes(x = chlorotic.area)) +
 We'll map another variable and add colours, using the `color = ...` argument in `geom_point()`
 
 ```{r}
-ggplot(tomato_mdf, aes(x = total.area, y = chlorotic.area)) + 
+kangoroos %>% 
+  drop_na(Mass, Leg) %>% 
+  ggplot(aes(x = Mass, y = Leg)) + 
   geom_point(color = "blue") 
 ```
 
@@ -687,21 +670,45 @@ selecting color using `color = ...` and `fill = ...` in `geom_boxplot()`
 #Add labels and titles using labs(title="name", x ="name", y="name") 
 
 ```{r}
-ggplot(tomato_mdf, aes(x = Treatment, y = total.area)) +
-  geom_boxplot(color="green", fill = "blue") + 
+kangoroos %>% 
+  drop_na(Sex, Mass) %>% 
+  ggplot(aes(x = Sex, y = Mass)) +
+  geom_boxplot(color="black", fill = "orangered") + 
   labs(title = "Boxplot", x = "Treatment", y = "Total Area") 
 ```
+
+### Bar (column) plot
+
+Selecting color using `aes(fill = ...)  ` and adding labels and titles.
+
+```{r}
+kangoroos %>%
+  group_by(Age, Sex) %>% 
+  summarise(mean_mass = mean(Mass)) %>% 
+  drop_na() %>% 
+  ggplot(aes(x = Age, 
+             y = mean_mass, 
+             fill = Sex)
+  ) +
+  geom_col() + 
+  labs(title = "Mean mass by age", x = "Age", y = "Mass") 
+
+```
+
 
 By default geom_col will stack each observation on top of each other for each x axis value. You can place them next to each other using `geom_col(position = "dodge")`
 
 ```{r}
-tomato_mdf %>% 
-  ggplot(aes(x = Treatment, 
-             y = total.area, 
-             fill = Infection)
+kangoroos %>%
+  group_by(Age, Sex) %>% 
+  summarise(mean_mass = mean(Mass)) %>% 
+  drop_na() %>% 
+  ggplot(aes(x = Age, 
+             y = mean_mass, 
+             fill = Sex)
   ) +
-  geom_col(position = "dodge") + 
-  labs(title = "Boxplot", x = "Treatment", y = "Total Area") 
+  geom_col(position = 'dodge') + 
+  labs(title = "Mean mass by age", x = "Age", y = "Mass") 
 ```
 
 ### Faceting plots
@@ -709,13 +716,14 @@ tomato_mdf %>%
 Say you want to separate your plots by infection to look at the effects separately. You can facet your plots using a categorical variable using `facet_wrap()` or `facet_grid()`.
 
 ```{r}
-tomato_mdf %>% 
-  ggplot(aes(x = Treatment, 
-             y = prop_area, 
-             fill = Treatment)) +
-  geom_boxplot() +
-  facet_wrap(~Infection) +
-  labs(title = "Boxplot", x = "Treatment", y = "Proportion of chlorotic area") 
+kangoroos %>% 
+  drop_na() %>% 
+  ggplot(aes(x = Leg,
+             y = Mass, 
+             colour = Age)) +
+  geom_point() +
+  facet_wrap(~Sex) +
+  labs(title = "Mass and length of leg along age", x = "Mass", y = "Leg length") 
 
 ```
 
@@ -724,57 +732,44 @@ tomato_mdf %>%
 We can add all data points on top of a box plot using `geom_jitter()` Notice what happens when you place jitter before vs. after geom_boxplot. We'll also change the theme here, because that's an option!   
 
 ```{r}
-tomato_mdf %>% 
-  ggplot(aes(x = Treatment, 
-             y = prop_area, 
-             fill = Treatment)) +
+kangoroos %>% 
+  drop_na() %>% 
+  ggplot(aes(x = Sex, 
+             y = Mass, 
+             fill = Sex)) +
   geom_boxplot() +
-  geom_jitter(width = 0.2) +
-  facet_wrap(~Infection) +
-  labs(title = "Boxplot", x = "Treatment", y = "Proportion of chlorotic area") +
+  geom_jitter(width = 0.2, alpha = 0.5, size = 1) +
+  labs(x = "Sex", y = "Mass") +
   theme_light()
 ```
 
 
-### Bar (column) plot
-
-Selecting color using `aes(fill = ...)  ` and adding labels and titles.
-
-```{r}
-tomato_mdf %>% 
-  ggplot(aes(x = Treatment, 
-             y = total.area, 
-             fill = Infection)
-  ) +
-  geom_col() + 
-  labs(title = "Boxplot", x = "Treatment", y = "Total Area") 
-
-```
-
 ### Line plots
 `geom_line()` is the function used to make line graphs. Let's make the x axis the rownames of our table, and plot the total area on the y axis while colouring by treatment. We also add labels and titles using `labs()` 
+
 ```{r}
-tomato_mdf %>% 
-  ggplot(aes(x = rownames(tomato),            
-             y = total.area, 
-             group = Treatment, 
-             color = Treatment )
+kangoroos %>% 
+  drop_na() %>% 
+  ggplot(aes(x = Age,            
+             y = Mass, 
+             group = ID, 
+             color = Sex)
   ) + 
   geom_line() + 
-  labs(title = "Lineplot", x = "Treatment", y = "Total Area") 
+  labs(x = "Age", y = "Mass") 
 ```
 
 That plot does not look good, let's change the order of the x axis using `scale_x_discrete()`. We want R to consider rownames as numeric for this so let's tell R that this data should be numeric.
 
 ```{r}
-tomato_mdf %>% 
-  ggplot(aes(x = rownames(tomato_mdf), 
-             y = total.area, group = Treatment, 
-             color = Treatment)
-  ) +
-  geom_line() +
-  scale_x_discrete(limits = sort(as.numeric(rownames(tomato_mdf)))) +  
-  labs(title = "Lineplot with Reordered Row Names", x = "Row Names", y = "Total Area")
+# kangoroos %>% 
+#   ggplot(aes(x = rownames(tomato_mdf), 
+#              y = total.area, group = Treatment, 
+#              color = Treatment)
+#   ) +
+#   geom_line() +
+#   scale_x_discrete(limits = sort(as.numeric(rownames(tomato_mdf)))) +  
+#   labs(title = "Lineplot with Reordered Row Names", x = "Row Names", y = "Total Area")
 
 ```
 
@@ -791,6 +786,7 @@ tomato_mdf %>%
 7. Save your plot using the `ggsave()` function as a 1400 x 1200 pixels file in .png format
 
 
+# Session 4 - Tuesday PM
 
 
 

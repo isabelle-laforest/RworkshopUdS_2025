@@ -25,6 +25,27 @@ str(my_first_data_frame)
 saveRDS(my_first_data_frame, "my_first_data_frame.RDS")
 ```
 
+Challenge 3
+```{r}
+library(readxl) 
+tomato <- read_xlsx('data/Rocio_tomato_modified.xlsx',
+                    sheet = 2)
+
+for (j in unique(tomato$Infection)) {
+  for (i in unique(tomato$rep)) {
+    
+    mean_value <- mean(
+      tomato$chlorotic.area[tomato$rep == i & 
+                              tomato$Infection ==j]
+      )
+
+    message("Mean chlorotic area (", i, ", " , j, "): ", 
+            round(mean_value,2), " pixels")
+  }
+}
+
+```
+
 
 Challenge 5
 
