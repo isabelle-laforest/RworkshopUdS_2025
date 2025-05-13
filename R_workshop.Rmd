@@ -636,6 +636,12 @@ kangoroos %<>%
 kangoroos
 ```
 
+## Challenge N˚4
+
+Using the `summarise()` command, find the mean Leg length and body mass for each sex at every age.
+
+
+
 ## Plotting using ggplot
 
 In this intro to GGplot2 we will look at mapping, layers, and scales. In `ggplot()`, you map your variables to what are called aesthetics and you add on layers to generate a plot that uses those mappings. You can then add in scales to further manipulate your plot. 
@@ -774,7 +780,7 @@ That plot does not look good, let's change the order of the x axis using `scale_
 ```
 
 
-## Challenge N˚5
+## Challenge N˚6
 
 1. Make a violin plot of the proportion of chlorosis for each treatment state using `geom_violin()`
 2. Add the points on top of the violins
