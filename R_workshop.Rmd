@@ -585,7 +585,7 @@ kangoroos <- read_xlsx('data/Marco_kangoroos.xlsx')
 glimpse(kangoroos)
 
 kangoroos <- kangoroos %>% 
-  select(ID, Sex, Age, Mass, Leg, Date) %>% 
+  select(ID, Sex, Age, Mass, Leg, Date, Teeth) %>% 
   mutate(ID = as.factor(ID),
          Sex = as.factor(Sex),
          Age = as.numeric(Age)) 
@@ -800,23 +800,25 @@ library(tidyr)
 library(dplyr)
 library(gapminder) # For demo dataset
 ```
+
 **Objectives**
 
 By the end of this session, you will:
 
-1. Understand ggplot2's theme system
-2. Apply built-in and custom themes
-3. Combine multiple plots with patchwork
-4. Create publication-quality figure layouts
+Understand ggplot2's theme system
+Apply built-in and custom themes
+Combine multiple plots with patchwork
+Create publication-quality figure layouts
 
 ## GGPLOT2 Themes
 
 You can find all the possible ggplot2 themes here: https://ggplot2.tidyverse.org/reference/ggtheme.html 
 
-```{r cars}
+```{r themes}
 data <- gapminder %>% filter(year == 2007)
 
-p <- ggplot(data, aes(gdpPercap, lifeExp)) +
+p <- data %>%
+  ggplot(aes(gdpPercap, lifeExp)) +
   geom_point(aes(size = pop, color = continent)) +
   scale_x_log10() +
   labs(title = "GDP vs Life Expectancy",
@@ -824,7 +826,6 @@ p <- ggplot(data, aes(gdpPercap, lifeExp)) +
        y = "Life Expectancy")
 
 # Demonstrate theme options
-par(mfrow=c(3,2))
 p + theme_dark()
 p + theme_gray()     # Default
 p + theme_bw()       # Black-and-white
@@ -836,6 +837,7 @@ p + theme_void()     # Empty canvas
 ## Customizing your theme
 
 You can modify greatly all aspects of your figures.
+There are numerous resources online to browse colours in R but here is one that I like to use: https://colorbrewer2.org/#type=sequential&scheme=Reds&n=3.
 
 ```{r custom}
 p + theme(
@@ -845,16 +847,97 @@ p + theme(
   axis.text = element_text(color = "darkblue")
 )
 ```
+## Facetwraps
+
+Now we will do this figure (boxplot) step by step to learn how to incrementally build a ggplot2 figure.
+
+Let's first reload the tomato (clean) data and relabel the factors to practice our newly learned syntax.
+
+```{r tomato}
+#Load the data
+tomato<-read_xlsx("data/Rocio_tomato_modified.xlsx",sheet=2)
+#Prepare the relabel function for both variables for clean plotting
+relabel.Treatement = as_labeller(c(mock = "Mock", 
+                   treated = "Treated"))
+relabel.Infection = as_labeller(c(pathogen = "Pathogen", 
+                   water = "Water"))
+#Transform our dataset with the %<>%
+tomato %<>%
+  rowwise() %>% 
+  mutate(Treatement = factor(relabel.Treatement(Treatement))) %>%
+  mutate(Infection = factor(relabel.Infection(Infection)))
+```
+
+Okay, let's start to build our plot!
+
+```{r 1}
+tomato %>%
+  ggplot(aes(Infection,chlorotic.area/total.area,shape=Infection))+
+  geom_boxplot(aes(fill=Infection))
+```
+Let's add the facet!
+
+```{r 2}
+(first_plot <- tomato %>%
+  ggplot(aes(Infection,chlorotic.area/total.area,shape=Infection))+
+  geom_boxplot(aes(fill=Infection))+
+  facet_wrap(~Treatement))
+```
+Great, now we can change our theme to the dark side!
+
+```{r 3}
+tomato %>%
+  ggplot(aes(Infection,chlorotic.area/total.area,shape=Infection))+
+  geom_boxplot(aes(fill=Infection))+
+  facet_wrap(~Treatement)+
+  theme_dark()
+```
+
+Let's add a jitter to see better each observation.
+
+```{r 4}
+tomato %>%
+  ggplot(aes(Infection,chlorotic.area/total.area,shape=Infection))+
+  geom_boxplot(aes(fill=Infection))+
+  facet_wrap(~Treatement)+
+  theme_dark()+
+  geom_jitter(width = 0.1,aes(fill=Treatement))
+```
+
+Let's change the colours and the shape of our point to be fillable.
+
+```{r 5}
+tomato %>%
+  ggplot(aes(Infection,chlorotic.area/total.area,shape=Infection))+
+  geom_boxplot(aes(fill=Infection))+
+  facet_wrap(~Treatement)+
+  theme_dark()+
+  geom_jitter(width = 0.1,aes(fill=Treatement))+
+  scale_fill_manual(values = c("#69B3A2","#de2d26","white","white"))+
+  scale_shape_manual(values = c(21,21))+
+  ylab(label="Leaf chlorotic area (%)")+
+  guides(fill=F,shape=F)
+```
+
+Perfect, now on to changing the Y label to something more publication ready.
+We can also remove the legend.
+
+```{r 6}
+(final_plot <- tomato %>%
+  ggplot(aes(Infection,chlorotic.area/total.area,shape=Infection))+
+  geom_boxplot(aes(fill=Infection))+
+  facet_wrap(~Treatement)+
+  theme_dark()+
+  geom_jitter(width = 0.1,aes(fill=Treatement))+
+  scale_fill_manual(values = c("#69B3A2","#de2d26","white","white"))+
+  scale_shape_manual(values = c(21,21))+
+  ylab(label="Leaf chlorotic area (%)")+
+  guides(fill=F,shape=F))
+```
 
 ## Challenge 7
 
-Create a scatterplot of your choice using the mpg dataset and:
-
-Apply theme_light() as base
-Customize:
-Make title center-aligned and red
-Change panel grid to dotted lines
-Move legend inside plot (position at c(0.8, 0.8))
+Create your own version of this graph, but changing the theme, the colours, the shape of the points, the X and Y labels, and adding a main title.
 
 ## Patchwork
 
@@ -862,7 +945,7 @@ Patchwork is an amazing package that allows you to create perfect multi-plot fig
 
 Here is an overview of the possibilities:
 
-```{r}
+```{r patchwork}
 p1 <- ggplot(mpg, aes(displ, hwy)) + geom_point()
 p2 <- ggplot(mpg, aes(class)) + geom_bar()
 p3 <- ggplot(mpg, aes(cty)) + geom_histogram()
@@ -879,7 +962,7 @@ p1 / p2
 
 Here are some additional options:
 
-```{r}
+```{r annotate,message=F,warning=F}
 # Add title to composition
 (p1 + p2) + plot_annotation(title = "My Dashboard")
 
@@ -891,20 +974,19 @@ Here are some additional options:
 
 ## Challenge 8
 
-Using the diamonds dataset:
+Using the boxplot figures that we created from the tomato dataset, combine three different plots (the first one and the final one that we created together + the one you modified)
 
-Create three different plots (any types)
 Combine them into a 1x3 horizontal layout
-Add a shared title "Diamond Analysis"
+Add a shared title "Walk through a tomato plotting contest"
 Label subplots as A, B, C
-
 ## Super challenge !
 
 Using Marco's dataset :
 
-1. Correct the Method variable so that `pole` is replaced by `Pole` (because we find both!)
-2. Dynamically create a vector containing the top 3 most common capture methods
-3. Create a density ridge plot showing the distribution of masses for each age, in a way that allows us to distinguish each method and compare both sexes.
+1. Dynamically create a vector containing the top 3 most common capture methods
+2. Correct the Method variable so that `pole` is replaced by `Pole` and `roadkill` is replaced by `Roadkill` (because both are there). You can try the `str_to_title()` function which will also take care of `RoadKill`!
+3. Create a density ridge plot showing the distribution of masses for each age, in a way that allows us to distinguish **each method** and compare **both sexes** visually.
+4. Does one of these facet annoy you? Find a creative way to visualise it better.
 
 
 
