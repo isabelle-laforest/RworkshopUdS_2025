@@ -636,7 +636,7 @@ kangoroos %<>%
 kangoroos
 ```
 
-## Challenge N˚4
+## Challenge N˚5
 
 Using the `summarise()` command, find the mean Leg length and body mass for each sex at every age.
 
@@ -780,19 +780,123 @@ That plot does not look good, let's change the order of the x axis using `scale_
 
 ## Challenge N˚6
 
-1. Make a violin plot of the proportion of chlorosis for each treatment state using `geom_violin()`
+. Make a violin plot of the proportion of Mass for each sex state using `geom_violin()`
 2. Add the points on top of the violins
-3. Add labels 
-3. Map the shape of the points to the `rep` variable (hint: you can reuse the `aes()` function inside any geom, here's a [reference](https://www.sthda.com/english/wiki/ggplot2-point-shapes))
-4. Facet this plot by infection state
+3. Add labels
+3. Map the shape of the points to the `Year` variable (hint: you can reuse the `aes()` function inside any geom, here's a [reference](https://www.sthda.com/english/wiki/ggplot2-point-shapes))
+4. Facet this plot by Method
 5. Use the minimal theme
 6. Change the colours of the violins to "darkred" and "midnightblue" (hint: check the `scale_fill_manual()` function)
 7. Save your plot using the `ggsave()` function as a 1400 x 1200 pixels file in .png format
 
-
 # Session 4 - Tuesday PM
 
+## Setup: load packages
 
+```{r packages}
+library(ggplot2)
+library(patchwork)
+library(tidyr)
+library(dplyr)
+library(gapminder) # For demo dataset
+```
+**Objectives**
+
+By the end of this session, you will:
+
+1. Understand ggplot2's theme system
+2. Apply built-in and custom themes
+3. Combine multiple plots with patchwork
+4. Create publication-quality figure layouts
+
+## GGPLOT2 Themes
+
+You can find all the possible ggplot2 themes here: https://ggplot2.tidyverse.org/reference/ggtheme.html 
+
+```{r cars}
+data <- gapminder %>% filter(year == 2007)
+
+p <- ggplot(data, aes(gdpPercap, lifeExp)) +
+  geom_point(aes(size = pop, color = continent)) +
+  scale_x_log10() +
+  labs(title = "GDP vs Life Expectancy",
+       x = "GDP per capita",
+       y = "Life Expectancy")
+
+# Demonstrate theme options
+par(mfrow=c(3,2))
+p + theme_dark()
+p + theme_gray()     # Default
+p + theme_bw()       # Black-and-white
+p + theme_minimal()  # Clean minimal
+p + theme_classic()  # Traditional
+p + theme_void()     # Empty canvas
+```
+
+## Customizing your theme
+
+You can modify greatly all aspects of your figures.
+
+```{r custom}
+p + theme(
+  plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+  panel.background = element_rect(fill = "aliceblue"),
+  legend.position = "bottom",
+  axis.text = element_text(color = "darkblue")
+)
+```
+
+## Challenge 7
+
+Create a scatterplot of your choice using the mpg dataset and:
+
+Apply theme_light() as base
+Customize:
+Make title center-aligned and red
+Change panel grid to dotted lines
+Move legend inside plot (position at c(0.8, 0.8))
+
+## Patchwork
+
+Patchwork is an amazing package that allows you to create perfect multi-plot figures for your publications.
+
+Here is an overview of the possibilities:
+
+```{r}
+p1 <- ggplot(mpg, aes(displ, hwy)) + geom_point()
+p2 <- ggplot(mpg, aes(class)) + geom_bar()
+p3 <- ggplot(mpg, aes(cty)) + geom_histogram()
+
+# Horizontal layout
+p1 + p2
+
+# Vertical layout
+p1 / p2
+
+# Grid layout
+(p1 | p2) / p3
+```
+
+Here are some additional options:
+
+```{r}
+# Add title to composition
+(p1 + p2) + plot_annotation(title = "My Dashboard")
+
+# Control spacing and guides
+(p1 + p2 + p3) + 
+  plot_layout(guides = "collect") +
+  plot_annotation(tag_levels = "A")
+```
+
+## Challenge 8
+
+Using the diamonds dataset:
+
+Create three different plots (any types)
+Combine them into a 1x3 horizontal layout
+Add a shared title "Diamond Analysis"
+Label subplots as A, B, C
 
 
 # Session 5 - Wednesday AM
