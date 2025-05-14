@@ -75,9 +75,6 @@ Let's first reload the tomato (clean) data and relabel the factors to practice o
 ```{r tomato}
 #Load the data
 tomato<-read_xlsx("Rocio_tomato_modified.xlsx",sheet=2)
-tomato$Infection[which(tomato$Infection=="pathogn")]<-"pathogen"
-tomato$Infection<-droplevels(tomato$Infection) #erase the empty factor level
-
 #Prepare the relabel function for both variables for clean plotting
 relabel.Treatement = as_labeller(c(mock = "Mock", 
                    treated = "Treated"))

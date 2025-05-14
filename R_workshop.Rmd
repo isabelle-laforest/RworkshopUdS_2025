@@ -989,9 +989,356 @@ Using Marco's dataset :
 3. Create a density ridge plot showing the distribution of masses for each age, in a way that allows us to distinguish **each method** and compare **both sexes** visually.
 4. Does one of these facet annoy you? Find a creative way to visualise it better.
 
+### Partial solution (we'll finish tomorrow)
 
+```{r}
+
+library(magrittr)
+library(ggridges)
+
+kang_roo <- read_xlsx('data/Marco_kangoroos.xlsx')  %>% 
+  select(ID, 
+         Sex, Age, Mass, Leg, Method, Teeth,
+         Date) %>% 
+  mutate(ID = as.factor(ID),
+         Sex = as.factor(Sex),
+         Age = as.numeric(Age)
+         ) 
+age_levels <- 
+  kang_roo %>% 
+  pull(Age) %>% 
+  unique()
+
+kang_roo %<>% 
+  mutate(Method = str_to_sentence(Method)) 
+
+these_methods <- kang_roo %>% 
+  group_by(Method) %>% 
+  summarise(obs.count = n()) %>% 
+  arrange(desc(obs.count)) %>% 
+  pull(Method) %>% 
+  head(3)
+
+kang_roo %>% 
+  filter(Method %in% these_methods)
+```
 
 # Session 5 - Wednesday AM
+
+## Set your working directory
+
+The functions setwd() and getwd() are your friends.
+
+Navigate in the Files panel with the blue wheel make sure that you see your working directory.
+
+## Load the packages you need
+
+```{r }
+library(tidyverse)
+library(readxl)
+```
+
+## Look at your data
+
+To start, we will load the tomato data and look at it.
+
+```{r}
+tomato<-read_xlsx("data/Rocio_tomato_modified.xlsx",sheet=2)
+tomato$Infection<-as.factor(tomato$Infection)
+tomato$Infection[which(tomato$Infection=="pathogn")]<-"pathogen"
+tomato$Infection<-droplevels(tomato$Infection)
+tomato <- tomato %>%
+  mutate(ratio = chlorotic.area / total.area)
+
+pathogen_only <- tomato %>%  
+  filter(Infection == "pathogen")
+```
+
+What should we do first?
+
+```{r }
+hist(pathogen_only$ratio)
+hist(pathogen_only$total.area)
+hist(pathogen_only$chlorotic.area)
+```
+
+## Normality
+
+Then we could check for normality:
+
+```{r normal}
+shapiro.test(pathogen_only$ratio)
+```
+
+OH MY GOD a p-value, what does this mean?
+Because it is <0.05, we can reject our H0 that the data is distributed normally.
+Thus, our data does not appear to follow a normal distribution.
+
+Here is a different way to perform normality tests on all the variables you want:
+
+```{r mnormal}
+variables_to_test <- c("chlorotic.area", "total.area", "ratio")
+
+# Loop over variables and apply Shapiro-Wilk test
+shapiro_results <- tomato %>%
+  select(all_of(variables_to_test)) %>%  # Select only the target variables
+  map(~ shapiro.test(.x)) %>%            # Apply Shapiro-Wilk test to each column
+  map_dfr(~ broom::tidy(.x), .id = "variable")  # Convert results to a tidy data frame
+
+# Print results
+print(shapiro_results)
+```
+
+## Homoskedasticity
+
+The second assumption is equal variance in our data, let's test it:
+
+```{r var}
+var.test(ratio~Treatement,data=pathogen_only)
+```
+
+Okay, so let's imagine our data is normal, what is the next step, look at our data again:
+
+```{r }
+boxplot(ratio~Treatement,data=pathogen_only) # a quick plot
+pathogen_only %>% ggplot(aes(Treatement, ratio, fill=Treatement, shape=Treatement))+
+  geom_boxplot()+geom_jitter(width=0.1,aes(fill="white"),size=3)+theme_classic()+
+  scale_shape_manual(values=c(21,21))+
+  scale_fill_manual(values = c("#69B3A2","#de2d26","white"))+
+  labs(title="Ratio of chlorotic and total areas impacted by treatment",x="Treatment",y="Ratio")+
+  guides(fill="none",color="none",shape="none")
+```
+
+In this graph, our H0 is that there is no difference in the mean of the Y variable between the two groups.
+Our H1 could be that there is a difference (less or more), or we could already have hypothesized that the treated group will have a lower ratio because of literature or our previous knowledge.
+Thus, we could expect significant results, no?
+So let's run a t-test:
+
+```{r ttest}
+t.test(ratio~Treatement,data=pathogen_only) # R defaults to the unequal variance test Welch Two Sample t-test
+t.test(ratio~Treatement,data=pathogen_only, var.equal=T) # default is two-sided# default is two-sided
+t.test(ratio~Treatement,data=pathogen_only,alternative = "less",var.equal=T)
+t.test(ratio~Treatement,data=pathogen_only,alternative = "greater",var.equal=T)
+```
+
+Let's now run the non-parametric equivalent, the Mann-Whitney-Wilcoxon Test:
+
+```{r mann}
+wilcox.test(ratio~Treatement,data=pathogen_only)
+```
+
+Still significant, we can now reject our H0.
+It seems like the means of the two groups are not equal.
+Did we demonstrate H1? No! But we cannot accept H0.
+
+## Challenge N˚9
+
+Create a water_only dataset
+Look at the histogram of the ratio variable
+Check for the normality and homoskedasticity of the ratio variable
+Perform a t.test and a Mann-Whitney-Wilcoxon
+
+## Install more packages!
+
+```{r}
+library(pacman)
+p_load(tidyverse, 
+       ggpubr, 
+       FSA, 
+       dunn.test, 
+       rstatix,
+       car,
+       readxl)
+```
+
+## Comparing the mean across more than two groups
+
+Let's use the Moss data set and plot the Nitrogen fixation (ARA_C2H4) across sampling months in 2017 independently for each moss species.
+
+```{r}
+# Load data
+Moss <- read_excel("data/Marie_Mosses.xlsx")
+
+# Transform some variables as factors
+Moss$Year <- as.factor(Moss$Year)
+Moss$Months <- factor(Moss$Months, levels = c("June","September","October"))
+
+# Subset to keep only data from 2017
+Moss2017 <- Moss[Moss$Year=="2017",]
+
+# Subset to keep only data from one moss specie
+Moss2017_PCC <- Moss2017[Moss2017$Species == "Ptilium crista-castrensis",]
+
+# Plot it
+ggplot(data = Moss2017_PCC, aes(x = Months, y = ARA_C2H4, fill = Months))+
+  geom_boxplot()+
+  theme_bw()+
+  scale_fill_manual(values = c("green","green4", "darkgreen"))
+
+```
+
+We want to evaluate if there is a significant difference in the nitrogen fixation across time. Therefore, we want to compare the mean of 3 groups (June, September, October).
+
+### ANOVA (parametric)
+
+Analysis of Variance
+
+#### Check the conditions to apply ANOVA 
+
+1. Independent observation  
+2. Normality (`shapiro.test()`) :
+
+```{r}
+shapiro.test(Moss2017_PCC$ARA_C2H4[Moss2017_PCC$Months == "June"])
+# p>0.05: data is normal
+
+shapiro.test(Moss2017_PCC$ARA_C2H4[Moss2017_PCC$Months == "September"])
+# p>0.05: data is normal
+
+shapiro.test(Moss2017_PCC$ARA_C2H4[Moss2017_PCC$Months == "October"])
+# p>0.05: data is normal
+```
+
+3. Homogeneous variance (`leveneTest()`) :
+
+```{r}
+leveneTest(Moss2017_PCC$ARA_C2H4 ~ Moss2017_PCC$Months)
+# p>0.05: variances are not significantly different
+```
+
+#### Perform ANOVA
+```{r}
+# Using anova()
+res <- anova(lm(Moss2017_PCC$ARA_C2H4 ~ Moss2017_PCC$Months))
+res # No difference between groups (Months)
+
+# Using aov()
+res2 <- aov(Moss2017_PCC$ARA_C2H4 ~ Moss2017_PCC$Months)
+summary(res2) # No difference between groups (Months)
+```
+
+According to the anova, there is no difference between sampling months.  
+
+### Tukey test (parametric post-hoc)
+If the anova had revealed a difference, we would have performed a Tukey test (parametric post-hoc) to know between which group there is a difference.
+```{r}
+# Difference between which groups?
+TukeyHSD(res2) # No difference between groups (Months)
+```
+
+### Kruskal-Wallis (non-parametric)
+
+Let's use the flowers data set and plot the alpha-diversity for each site (code).
+
+```{r}
+# Import dataset
+flowers <- read_excel("data/meta.flower.2022.xlsx")
+# Transform the variable code as factor
+flowers$code <- as.factor(flowers$code)
+
+# Plot alpha-diversity for each site (code)
+(plot.flower <- ggplot(flowers, aes(code, alphadiv, fill = code))+
+  geom_boxplot()+
+    theme_bw())
+```
+
+#### Test normality
+```{r}
+shapiro.test(flowers$alphadiv[flowers$code == "A"])
+# p>0.05: data is normal
+shapiro.test(flowers$alphadiv[flowers$code == "B1"])
+# p>0.05: data is NOT normal
+shapiro.test(flowers$alphadiv[flowers$code == "C"])
+# p>0.05: data is NOT normal
+```
+
+#### Perform Kruskal test
+```{r}
+kruskal_test(flowers, alphadiv~code)
+# there is a significant difference between some groups
+```
+
+### Dunn test (non-parametric post-hoc)
+```{r}
+dunn_test(flowers, alphadiv~code)
+# Differences are between groups A-C and B1-C
+# No difference between groups A-B1
+```
+
+Let's plot the statistical result on the graph
+```{r}
+# Store dunn test result in an object
+dunn.res <- dunn_test(flowers, alphadiv~code)
+# Manually extract p-values from dunn test results
+p_values <- dunn.res$p.adj.signif[c(1, 2, 3)]  
+# Find x and y positions for the p-value
+stat.flower <- add_xy_position(dunn.res, x = "code")
+# List of comparison
+comparisons <- list(c("A", "B1"), c("A", "C"), c("B1", "C"))
+# Add on the graph
+plot.flower+
+  geom_signif(comparisons = comparisons,
+              annotations = p_values,
+              y_position = stat.flower$y.position) 
+```
+
+To conclude, if we want two compare the mean between more than two groups we first need to know if we use a parametric (Anova) or a non-parametric (Kruskal-Wallis) test. So we first test the normality of all group using `shapiro.test()` (p<0.05: Not normal; p>0.05 Normal) and the homogeneity of the variance using `leveneTest()`.  
+
+Depending on the results, we will perform an Anova or a Kruskal test. If the result of the Anova is significant, we then perform a post-hoc Tukey test. If the the result of the Kruskal test is dignificant, we then perform a post-hoc Dunn test.
+
+
+## Correlation between two variables
+
+### Pearson & Spearman
+
+Pearson = parametric  
+Spearman = non-parametric
+
+####Test normality:
+```{r}
+shapiro.test(Moss2017$Fe_ppm)
+# p<0.05: Not normal
+shapiro.test(Moss2017$P_ppm)
+# p>0.05 Normal
+shapiro.test(Moss2017$CN_Ratio)
+# p>0.05 Normal
+shapiro.test(Moss2017$`N_mg.g-1`)
+# p>0.05 Normal
+```
+
+####Perform correlation test:
+```{r}
+# Pearson (parametric)
+plot(Moss2017$P_ppm,Moss2017$CN_Ratio)
+cor.test(Moss2017$P_ppm, Moss2017$CN_Ratio, method = "pearson")
+# p<0.05: Reject H0 -> there is a correlation (r = -0.4)
+
+# Spearman (non-parametric)
+plot(Moss2017$Fe_ppm, Moss2017$P_ppm)
+cor.test(Moss2017$Fe_ppm, Moss2017$P_ppm, method = "spearman")
+# p<0.05: Reject H0 -> there is a correlation (r = -0.5)
+
+# Pearson (parametric)
+plot(Moss2017$`N_mg.g-1`, Moss2017$CN_Ratio)
+cor.test(Moss2017$`N_mg.g-1`, Moss2017$CN_Ratio, method = "pearson")
+# p<0.05: Reject H0 -> there is a correlation (r = -0.98)
+```
+
+#### Add correlation coefficient and p-value to the plot:
+```{r}
+ggplot(Moss2017, aes(`N_mg.g-1`,CN_Ratio, add = "reg.line"))+
+  geom_point()+
+  theme_bw()+
+  geom_smooth(method = "lm")+
+  stat_cor(method = "pearson", label.x = 9, label.y = 63)
+```
+
+## Challenge N˚10  
+
+Test if there is a correlation between two other variables from the moss data set  
+- Test normality of both variables  
+- Perform appropriate correlation test  
+- Plot it and add correlation coefficient and p-value
 
 # Session 6 - Wednesday PM
 
