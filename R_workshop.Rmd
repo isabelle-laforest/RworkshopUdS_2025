@@ -644,7 +644,7 @@ Using the `summarise()` command, find the mean Leg length and body mass for each
 
 In this intro to GGplot2 we will look at mapping, layers, and scales. In `ggplot()`, you map your variables to what are called aesthetics and you add on layers to generate a plot that uses those mappings. You can then add in scales to further manipulate your plot. 
 
-We will map or select the data using `aes()`. Then we will select the type of graph we want using using a geom, for example: `geom_histogram()`; `geom_point()`; `geom_boxplot()`, geom_col(), `geom_line()`. We will make 4 plots, for each one we will learn a new syntax,slowly adding layers to the plot.
+We will map or select the data using `aes()`. Then we will select the type of plot we want using using a geom, for example: `geom_histogram()`; `geom_point()`; `geom_boxplot()`, geom_col(), `geom_line()`. We will make 4 plots, for each one we will learn a new syntax,slowly adding layers to the plot.
 
 ### Histograms
 
@@ -937,7 +937,7 @@ We can also remove the legend.
 
 ## Challenge 7
 
-Create your own version of this graph, but changing the theme, the colours, the shape of the points, the X and Y labels, and adding a main title.
+Create your own version of this plot, but changing the theme, the colours, the shape of the points, the X and Y labels, and adding a main title.
 
 ## Patchwork
 
@@ -1109,7 +1109,7 @@ pathogen_only %>% ggplot(aes(Treatement, ratio, fill=Treatement, shape=Treatemen
   guides(fill="none",color="none",shape="none")
 ```
 
-In this graph, our H0 is that there is no difference in the mean of the Y variable between the two groups.
+In this plot, our H0 is that there is no difference in the mean of the Y variable between the two groups.
 Our H1 could be that there is a difference (less or more), or we could already have hypothesized that the treated group will have a lower ratio because of literature or our previous knowledge.
 Thus, we could expect significant results, no?
 So let's run a t-test:
@@ -1265,7 +1265,7 @@ dunn_test(flowers, alphadiv~code)
 # No difference between groups A-B1
 ```
 
-Let's plot the statistical result on the graph
+Let's plot the statistical result on the plot
 ```{r}
 # Store dunn test result in an object
 dunn.res <- dunn_test(flowers, alphadiv~code)
@@ -1275,7 +1275,7 @@ p_values <- dunn.res$p.adj.signif[c(1, 2, 3)]
 stat.flower <- add_xy_position(dunn.res, x = "code")
 # List of comparison
 comparisons <- list(c("A", "B1"), c("A", "C"), c("B1", "C"))
-# Add on the graph
+# Add on the plot
 plot.flower+
   geom_signif(comparisons = comparisons,
               annotations = p_values,
@@ -1342,3 +1342,61 @@ Test if there is a correlation between two other variables from the moss data se
 
 # Session 6 - Wednesday PM
 
+
+## Import Data: 
+```{r}
+GR <- read_excel("data/Green_Roof.xlsx")
+```
+
+For this analysis we want to know how roof age (the explanatory variable) influences the response variable plant cover (Moss, Suc) let's start with Moss, we will need to filter out all other cover types.
+
+```{r}
+Cut<- GR %>% filter(Spp == "Moss")
+```
+
+### Check Normality of Moss using the function
+
+
+`shapiro.test()`
+Get Moss as close to normality as possible (reciprocal, logarithm, cube root, square root, and square)
+
+```{r}
+shapiro.test(log10(Cut$Cover))
+hist(log10(Cut$Cover))
+
+```
+
+
+### Run Regression
+Here moss will be the response variable and age will be the explanatory variable. `lm()` is the function for simple regression.
+
+```{r}
+lm(formula = log10(Cover) ~ Age, data = Cut)
+```
+
+This code works, but it only gives us the Coefficients. To get more details let's save it in an object and use the summary function:
+```{r}
+Reg<-lm(formula = log10(Cover) ~ Age, data = Cut)
+summary(Reg)
+```
+
+### Plot it
+Now let's make a plot of our regresstion using GGplot 2
+```{r}
+ggplot(Cut, aes(x=Age, y=Cover)) +
+  geom_point(size=2)+
+  geom_smooth(method=lm , color="red", se=FALSE)+
+  theme_set(theme_bw())
+```
+
+
+## Challenge N˚11 
+Create a plot with 2 regression lines, `moss` and `suc` and write the r2 value on the plot
+```{r}
+ggplot(GR, aes(x=Age, y=Cover, color=Spp)) +
+  geom_point(size=2)+
+  geom_smooth(method=lm , se=FALSE)+
+  theme_set(theme_bw())
+
+```
+ 
