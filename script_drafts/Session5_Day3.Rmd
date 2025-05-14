@@ -1,0 +1,121 @@
+---
+title: 'Session 5: A primer for statistics'
+author: "Isabelle Laforest-Lapointe"
+date: "2025-05-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Set your working directory
+
+The functions setwd() and getwd() are your friends.
+
+Navigate in the Files panel with the blue wheel make sure that you see your working directory.
+
+## Load the packages you need
+
+```{r packages,message=F,warning=F}
+library(tidyverse)
+library(readxl)
+```
+
+## Look at your data
+
+To start, we will load the tomato data and look at it.
+
+```{r tomato data}
+tomato<-read_xlsx("Rocio_tomato_modified.xlsx",sheet=2)
+tomato$Infection<-as.factor(tomato$Infection)
+tomato$Infection[which(tomato$Infection=="pathogn")]<-"pathogen"
+tomato$Infection<-droplevels(tomato$Infection)
+tomato <- tomato %>%
+  mutate(ratio = chlorotic.area / total.area)
+
+pathogen_only <- tomato %>%  
+  filter(Infection == "pathogen")
+```
+
+What should we do first?
+
+```{r hist}
+hist(pathogen_only$ratio)
+hist(pathogen_only$total.area)
+hist(pathogen_only$chlorotic.area)
+```
+## Normality
+
+Then we could check for normality:
+
+```{r normal}
+shapiro.test(pathogen_only$ratio)
+```
+OH MY GOD a p-value, what does this mean?
+Because it is <0.05, we can reject our H0 that the data is distributed normally.
+Thus, our data does not appear to follow a normal distribution.
+
+Here is a different way to perform normality tests on all the variables you want:
+
+```{r mnormal}
+variables_to_test <- c("chlorotic.area", "total.area", "ratio")
+
+# Loop over variables and apply Shapiro-Wilk test
+shapiro_results <- tomato %>%
+  select(all_of(variables_to_test)) %>%  # Select only the target variables
+  map(~ shapiro.test(.x)) %>%            # Apply Shapiro-Wilk test to each column
+  map_dfr(~ broom::tidy(.x), .id = "variable")  # Convert results to a tidy data frame
+
+# Print results
+print(shapiro_results)
+```
+
+## Homoskedasticity
+
+The second assumption is equal variance in our data, let's test it:
+
+```{r var}
+var.test(ratio~Treatement,data=pathogen_only)
+```
+
+Okay, so let's imagine our data is normal, what is the next step, look at our data again:
+
+```{r plot}
+boxplot(ratio~Treatement,data=pathogen_only) # a quick plot
+pathogen_only %>% ggplot(aes(Treatement, ratio, fill=Treatement, shape=Treatement))+
+  geom_boxplot()+geom_jitter(width=0.1,aes(fill="white"),size=3)+theme_classic()+
+  scale_shape_manual(values=c(21,21))+
+  scale_fill_manual(values = c("#69B3A2","#de2d26","white"))+
+  labs(title="Ratio of chlorotic and total areas impacted by treatment",x="Treatment",y="Ratio")+
+  guides(fill="none",color="none",shape="none")
+```
+
+In this graph, our H0 is that there is no difference in the mean of the Y variable between the two groups.
+Our H1 could be that there is a difference (less or more), or we could already have hypothesized that the treated group will have a lower ratio because of literature or our previous knowledge.
+Thus, we could expect significant results, no?
+So let's run a t-test:
+
+```{r ttest}
+t.test(ratio~Treatement,data=pathogen_only) # R defaults to the unequal variance test Welch Two Sample t-test
+t.test(ratio~Treatement,data=pathogen_only, var.equal=T) # default is two-sided# default is two-sided
+t.test(ratio~Treatement,data=pathogen_only,alternative = "less",var.equal=T)
+t.test(ratio~Treatement,data=pathogen_only,alternative = "greater",var.equal=T)
+```
+
+Let's now run the non-parametric equivalent, the Mann-Whitney-Wilcoxon Test:
+
+```{r mann}
+wilcox.test(ratio~Treatement,data=pathogen_only)
+```
+
+Still significant, we can now reject our H0.
+It seems like the means of the two groups are not equal.
+Did we demonstrate H1? No! But we cannot accept H0.
+
+## Challenge 9
+
+Create a water_only dataset
+Look at the histogram of the ratio variable
+Check for the normality and homoskedasticity of the ratio variable
+Perform a t.test and a Mann-Whitney-Wilcoxon
