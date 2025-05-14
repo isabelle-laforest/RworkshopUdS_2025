@@ -877,7 +877,7 @@ tomato %>%
 ```
 Let's add the facet!
 
-```{r 2}
+```{r }
 (first_plot <- tomato %>%
   ggplot(aes(Infection,chlorotic.area/total.area,shape=Infection))+
   geom_boxplot(aes(fill=Infection))+
@@ -885,7 +885,7 @@ Let's add the facet!
 ```
 Great, now we can change our theme to the dark side!
 
-```{r 3}
+```{r }
 tomato %>%
   ggplot(aes(Infection,chlorotic.area/total.area,shape=Infection))+
   geom_boxplot(aes(fill=Infection))+
@@ -895,7 +895,7 @@ tomato %>%
 
 Let's add a jitter to see better each observation.
 
-```{r 4}
+```{r }
 tomato %>%
   ggplot(aes(Infection,chlorotic.area/total.area,shape=Infection))+
   geom_boxplot(aes(fill=Infection))+
@@ -906,7 +906,7 @@ tomato %>%
 
 Let's change the colours and the shape of our point to be fillable.
 
-```{r 5}
+```{r }
 tomato %>%
   ggplot(aes(Infection,chlorotic.area/total.area,shape=Infection))+
   geom_boxplot(aes(fill=Infection))+
@@ -922,7 +922,7 @@ tomato %>%
 Perfect, now on to changing the Y label to something more publication ready.
 We can also remove the legend.
 
-```{r 6}
+```{r }
 (final_plot <- tomato %>%
   ggplot(aes(Infection,chlorotic.area/total.area,shape=Infection))+
   geom_boxplot(aes(fill=Infection))+
@@ -945,7 +945,7 @@ Patchwork is an amazing package that allows you to create perfect multi-plot fig
 
 Here is an overview of the possibilities:
 
-```{r patchwork}
+```{r }
 p1 <- ggplot(mpg, aes(displ, hwy)) + geom_point()
 p2 <- ggplot(mpg, aes(class)) + geom_bar()
 p3 <- ggplot(mpg, aes(cty)) + geom_histogram()
@@ -1399,4 +1399,288 @@ ggplot(GR, aes(x=Age, y=Cover, color=Spp)) +
   theme_set(theme_bw())
 
 ```
- 
+## Linear Models +++
+
+**Objectives**
+
+By the end of this session, you will:
+
+**1. Understand When to Use Mixed/NL Models**
+
+Identify scenarios requiring random effects (LMMs) or nonlinear relationships (e.g., growth curves, repeated measures).
+
+**2. Build & Interpret LMMs in R**
+
+Fit models with lme4/nlme (e.g., lmer(y ~ x + (1|ID))), interpret random vs. fixed effects, and evaluate assumptions (residual plots, singularity).
+
+**3. Model Nonlinear Trends**
+
+Implement flexible approaches: polynomials (poly(x,2)), splines (ns()), or GAMs (mgcv::gam) for curved relationships.
+
+**4. Visualize Results Effectively**
+
+Create diagnostic plots (QQ, residuals) and publication-ready graphs with ggplot2/patchwork, including random effects predictions and confidence bands.
+
+### Load packages
+
+```{r , message=FALSE, warning=F}
+library(pacman) # A magician package to load packages
+pacman::p_load(tidyverse,patchwork,lme4,lmerTest,emmeans)
+```
+### Load roo data
+
+```{r , message=FALSE, warning=FALSE}
+roo <- read_xlsx('data/Marco_kangoroos.xlsx')
+```
+
+Let's take a quick peek before starting:
+
+```{r }
+summary(roo)
+```
+
+You can also use the function *View()* to see the whole dataset.
+
+Now, let's modify it a bit for the sake of simplicity. We will remove all individuals that have Ad in the Age variable. Here is a code using base R to do it but you can also use dplyr/tidyr syntax to do so:
+
+```{r Age}
+roo<-roo[-c(which(roo$Age=="Ad")),];dim(roo)
+```
+
+We will also filter out any roo that does not have 5 measurements (recaptures):
+
+```{r 5}
+roo_filtered <- roo %>%
+  group_by(ID) %>%          # Group by the ID column
+  filter(n() >= 5) %>%      # Keep groups with 5+ rows
+  ungroup()
+dim(roo_filtered)
+```
+
+So, we will explore the relationship between mass, age, and sex.
+Before continuing to the models, we need to make sure our variables are good to go.
+Age needs to be numeric
+Sex and ID need to be factors
+
+```{r tranformations}
+roo_filtered$Age <- as.numeric(roo_filtered$Age)
+roo_filtered$Sex <- as.factor(roo_filtered$Sex)
+roo_filtered$ID <- as.factor(roo_filtered$ID)
+```
+
+Let's confirm everything looks good:
+
+```{r confirm}
+summary(roo_filtered)
+```
+
+Excellent, now on to our Y variable:
+
+```{r mass}
+summary(roo_filtered$Mass)
+hist(roo_filtered$Mass)
+```
+
+We are ready to go!
+
+### Fit a Linear Models
+
+With only Mass:
+
+```{r lm_model1}
+model_lm1 <- lm(Mass ~ Age, data = roo_filtered)
+summary(model_lm1)
+```
+With only Sex:
+
+```{r lm_model2}
+model_lm2 <- lm(Mass ~ Sex, data = roo_filtered)
+summary(model_lm2)
+```
+
+With Mass and Sex but no interaction:
+
+```{r lm_model3}
+model_lm3 <- lm(Mass ~ Age + Sex, data = roo_filtered)
+summary(model_lm3)
+```
+
+With an interaction:
+**Formula Breakdown:**
+Mass ~ Age * Sex: Tests main effects of Age and Sex, plus their interaction
+
+```{r lm_model4}
+model_lm4 <- lm(Mass ~ Age * Sex, data = roo_filtered)
+summary(model_lm4)
+```
+
+### Fit a Linear Mixed Model
+
+**Formula Breakdown:**
+Mass ~ Age * Sex: Tests main effects of Age and Sex, plus their interaction
+(1 | ID): Random intercept for each kangaroo (accounts for repeated measures)
+
+```{r lmr_model}
+model_lmr <- lmer(Mass ~ Age * Sex + (1 | ID), data = roo_filtered)
+summary(model_lmr)
+```
+
+The model summary shows:
+
+Fixed effects (Age, Sex, Age:Sex) with estimates and p-values
+
+Random effects variance (how much IDs deviate from the mean)
+
+Model fit statistics (AIC, BIC)
+
+### Residual diagnostics
+
+Let's check the residuals diagnostic of the model to confirm they are good
+
+```{r diagnostic}
+plot(model_lmr)               # Residuals vs. fitted
+qqnorm(resid(model_lmr))      # QQ plot
+hist(resid(model_lmr))        # Residual distribution
+```
+
+### Check for singularity:
+
+Did you over-fit your model:
+
+```{r singular}
+isSingular(model_lmr)  # Should return FALSE
+```
+
+### Post-hoc Analysis (If Interaction is Significant)
+
+Here we will check simple slopes analysis.
+
+```{r posthoc}
+emtrends(model_lmr, ~ Sex, var = "Age")  # Age effect per sex level
+```
+
+And perform pairwise comparisons:
+
+```{r }
+emm <- emmeans(model_lmr, ~ Age * Sex)
+pairs(emm, adjust = "tukey")
+```
+
+## Alternative Model Specifications
+
+You could also want random slopes:
+
+```{r }
+model_rs <- lmer(Mass ~ Age * Sex + (Age | ID), data = roo_filtered)
+summary(model_rs)
+```
+
+### Plotting the linear model
+
+```{r plot_lm, warning=F,message=F}
+A<-ggplot(roo_filtered, aes(Age, Mass, color = Sex)) + 
+  geom_point() + scale_color_manual(values = c("#404080", "#69B3A2"))+
+  theme_minimal()+
+  geom_smooth(method = "lm")+
+  labs(title = "Linear fit: Mass vs. Age by Sex")+
+  theme(
+    legend.position = c(0.95, 0.75),            # Bottom-right (0-1 coordinates)
+    legend.justification = c(1, 0),              # Anchor point
+    legend.box.background = element_rect(color = "black", size = 0.5),  # Border
+    legend.box.margin = margin(5, 5, 5, 5)       # Padding
+  );A
+```
+
+Oh, now we realize that the relationship between Age and Mass appears non-linear in the ggplot, we could thus adapt our analysis to use a non-linear model instead to fit better the data:
+
+### Basic GAM (Non-linear Fixed Effects)
+
+```{r mgcv, warning=FALSE}
+library(mgcv)
+```
+
+### Fit the GAM
+
+Fit GAM with smooth term for Age, fixed effect for Sex, and their interaction
+
+```{r GAM}
+gam_model <- gam(
+  Mass ~ s(Age) + Sex + s(Age, by = Sex),  # s() = smooth term
+  data = roo_filtered,
+  method = "REML"  # Restricted Maximum Likelihood (default)
+)
+summary(gam_model)
+```
+
+In this code:
+
+s(Age): Smooth (non-linear) effect of Age.
+
+by = Sex: Allows the smooth effect of Age to vary by Sex.
+
+### GAM with Random Effects (GAMM)
+
+To account for repeated measures (ID as a random effect):
+
+#### Using mgcv (simpler syntax)
+```{r }
+gamm_model <- gam(
+  Mass ~ s(Age) + Sex + s(Age, by = Sex) + s(ID, bs = "re"),  # bs="re" = random effect
+  data = roo_filtered,
+  method = "REML"
+)
+summary(gamm_model)
+```
+
+### Model Diagnostics
+
+Check smooth terms and residuals
+```{r gam_model}
+plot(gamm_model, pages = 1, shade = TRUE)  # Visualize smooths
+gam.check(gamm_model)                      # Diagnostic plots (QQ, residuals vs. fitted)
+```
+
+### Compare to Linear Model
+
+Fit linear model for comparison
+```{r comparison}
+lm_model <- lm(Mass ~ Age * Sex, data = roo_filtered)
+```
+
+Compare AIC (lower = better)
+```{r AIC}
+AIC(gam_model, lm_model)
+```
+
+Plot it
+
+```{r plot_nlm,warning=F,message=F}
+B<-ggplot(roo_filtered, aes(Age, Mass, color = Sex)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "gam", formula = y ~ s(x), se = TRUE) +  # GAM smoother+
+  scale_color_manual(values = c("#404080", "#69B3A2"))+
+  theme_minimal()+
+  labs(title = "Non-linear fit: Mass vs. Age by Sex")+
+  theme(
+    legend.position = c(0.85, 0.95),
+    legend.direction = "horizontal",                    # Stack items horizontally
+    legend.title = element_text(size = 10, face = "bold"),
+    legend.text = element_text(size = 8),
+    legend.key = element_blank()                       # Remove key background
+  );B
+```
+
+### Patchwork
+And we can wrap up this session by merging the two plots with patchwork:
+
+```{r patchwork, message=FALSE,warning=F}
+A+B+plot_annotation(tag_levels = 'A') &
+  theme(plot.tag = element_text(size = 14, face = "bold"))
+```
+
+## Challenge N˚12
+
+Create a subset dataset with the roos Age < 6 and fit a linear mixed model to the data with the same formula that we used above.
+Look at the model summary and perform the diagnostics.
+
+
